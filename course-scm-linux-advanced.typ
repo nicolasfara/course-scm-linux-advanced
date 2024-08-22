@@ -5,11 +5,12 @@
 
 #show: metropolis-theme.with(
   aspect-ratio: "16-9",
-  footer: [Optional Footnote]
+  footer: [Nicolas Farabegoli --- Advanced Linux \@ SCM Campus #datetime.today().year()]
 )
 
+#set text(lang: "it")
 #set text(font: "Fira Sans", weight: 350, size: 20pt)
-#show math.equation: set text(font: "Fira Math")
+#show math.equation: set text(font: "New Computer Modern Math")
 #set strong(delta: 200)
 #set par(justify: true)
 
@@ -34,22 +35,20 @@
   footnote(cite(form: "full", label(clabel)))
 }
 
-#let author = block(inset: 0.1em)[
-  #table(inset: 0.5em, stroke: none, columns: (auto, 4fr),  align: (left, left),
-    [#alert[*Author 1*]], [`author1@mail.com`],
-    [Author 2], [`author2@mail.com`],
-    [Author 3], [`author3@mail.com`],
+#let author = block(inset: 0.0em)[
+  #table(inset: (0em, 0.7em), stroke: none, columns: (auto, 4fr),  align: (left, left),
+    [#alert[*Nicolas Farabegoli*]], []
   )
-  #place(right, dy:-1.5em)[
+  #place(right + top, dy: 4.5em)[
     #figure(image("images/disi.svg", width:40%))
   ]
 ]
 
 #title-slide(
-  title: "Slide Title",
-  subtitle: "Subtitle",
+  title: [Advanced Linux],
+  subtitle: [Demoni e timer --- Package manager --- Ambienti grafici],
   author: author,
-  // date: datetime.today().display("[day] [month repr:long] [year]"),
+  date: [Compiled *#datetime.today().display()*], //.display("[day] [month repr:long] [year]"),
 )
 
 #new-section-slide("Slide section 1")
@@ -57,7 +56,7 @@
 #slide(title: "Slide")[
   *Bold* and _italic_ text.
   
-  This is a citiation @nicolas_farabegoli_2024_10535841.
+  // This is a citiation @nicolas_farabegoli_2024_10535841.
 
   #alert[
     This is an alert.
@@ -96,6 +95,6 @@
   #fa-icon("github", fa-set: "Brands", fill: blue) -- Github icon blue fill
 ]
 
-#slide[
-  #bibliography("bibliography.bib")
-]
+// #slide[
+//   #bibliography("bibliography.bib")
+// ]

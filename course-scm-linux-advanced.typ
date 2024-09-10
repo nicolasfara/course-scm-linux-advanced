@@ -51,48 +51,29 @@
   date: [Compiled *#datetime.today().display()*], //.display("[day] [month repr:long] [year]"),
 )
 
-#new-section-slide("Slide section 1")
+#new-section-slide([Init System --- OpenRC vs Systemd])
 
-#slide(title: "Slide")[
-  *Bold* and _italic_ text.
-  
-  // This is a citiation @nicolas_farabegoli_2024_10535841.
+#slide(title: [Che cos'è un *Init System*?])[
+  In *Linux* e sistemi *Unix-like* l'#underline[init system] è il #alert[primo] processo e che si occupa di avviare *tutti* gli altri processi del sistema.
 
-  #alert[
-    This is an alert.
-  ]
+  Questo processo viene *eseguito dal kernel* a tempo di avvio con `PID 1` (quello con `ID 0` è il kernel stesso) ed è eseguito in #alert[background] fino allo spegnimento del sistema.
+
+  Un processo può avviare altri processi (child), ma se il processo padre *muore*,
+  #alert[init] si occupa di "adottare" i processi orfani.
+
+  #figure(image("images/Linux-init-Systems.png")) // CAMBIARE IMMAGINE
 ]
 
-#slide(title: "Code slide")[
-  ```kotlin
-  fun main() {
-      println("Hello, world!")
+#slide(title: [Init systems disponibili])[
+  Nel corso degli anni sono stati proposti diversi *init system* adottati dalle principali distribuzioni *Linux*.
 
-      for (i in 0..9) {
-          println(i)
-      }
-      println("Goodbye, world!")
-  }
-  ```
-]
+  I principali sono:
+  - *`System V`* (`SysV`) --- _a mature and popular init scheme on Unix-like operating systems_
+  - #alert[*`OpenRC`*] --- _a dependency-based init scheme for Unix-like operating systems_
+  - #alert[*`Systemd`*] --- _relatively new init scheme on the Linux platform_
+  - *`Upstart`* --- _an event-based init system developed by Canonical_ (_*fuori produzione*_ #fa-warning())
 
-#slide[
-  = This is a title
-
-  #lorem(24)
-
-  == This is a subtitle
-
-  #lorem(34)
-]
-
-#slide[
-
-  == Icon in a title #fa-java()
-
-  #fa-icon("github", fa-set: "Brands") -- Github icon
-
-  #fa-icon("github", fa-set: "Brands", fill: blue) -- Github icon blue fill
+  In questo corso ci concentreremo su *OpenRC* e *Systemd*.
 ]
 
 // #slide[

@@ -19,12 +19,12 @@
 #show quote: set pad(x: 2em, y: -0.8em)
 
 #set raw(tab-size: 4)
-#show raw.where(block: true): block.with(
-  fill: luma(240),
-  inset: 1em,
-  radius: 0.7em,
-  width: 100%,
-)
+// #show raw.where(block: true): block.with(
+//   fill: luma(240),
+//   inset: 1em,
+//   radius: 0.7em,
+//   width: 100%,
+// )
 
 #show bibliography: set text(size: 0.8em)
 #show footnote.entry: it => {
@@ -46,6 +46,139 @@
 
 #let section(title) = new-section-slide(title)
 #let centering(content) = align(center, content)
+
+#let carbon-snippet(
+  code,
+  theme: "monokai",
+  font: "JetBrains Mono",
+  background-color: luma(230),
+  header-color: rgb("#1e1f1c"),
+  radius: 0.3em
+) = {
+  let themes = (
+    "monokai": (
+      keyword: rgb("#f92672"),
+      function: rgb("#66d9ef"),
+      string: rgb("#e6db74"),
+      comment: rgb("#75715e"),
+      type: rgb("#a6e22e"),
+    ),
+    // Add more themes here
+  )
+
+  let current-theme = themes.at(theme, default: themes.monokai)
+
+  //set text(font: font, size: 9pt, fill: text-color)
+  let code-lines = code.text.split("\n")
+  let line-count = code-lines.len()
+  
+  box(
+    width: 100%,
+    fill: background-color,
+    radius: radius,
+    stroke: (paint: background-color, thickness: 0.07em),
+    [
+      #box(
+        width: 100%,
+        height: 1.3em,
+        inset: 0.5em,
+        fill: header-color,
+        radius: (top-left: radius, top-right: radius),
+        [
+          #stack(dir: ltr, spacing: 0.4em)[
+            #circle(radius: 0.3em, fill: rgb("#ff5f56"))
+          ][
+            #circle(radius: 0.3em, fill: rgb("#ffbd2e"))
+          ][
+            #circle(radius: 0.3em, fill: rgb("#27c93f"))
+          ]
+        ]
+      )
+      #v(-10pt)
+      #pad(
+        bottom: 0.8em,
+        grid(
+          columns: (1em, auto),
+          column-gutter: 0.8em,
+          row-gutter: 0.4em,
+          ..code-lines.enumerate().map(((i, line)) => {
+            (
+              align(right + horizon, text(fill: header-color, size: 0.8em, str(i + 1))),
+              [#raw(line, lang: code.lang)],
+            )
+          }).flatten()
+        )
+      )
+    ]
+  )
+}
+
+#let carbon-shell(
+  code,
+  theme: "monokai",
+  font: "JetBrains Mono",
+  background-color: luma(230),
+  header-color: rgb("#1e1f1c"),
+  radius: 0.3em
+) = {
+  let themes = (
+    "monokai": (
+      keyword: rgb("#f92672"),
+      function: rgb("#66d9ef"),
+      string: rgb("#e6db74"),
+      comment: rgb("#75715e"),
+      type: rgb("#a6e22e"),
+    ),
+    // Add more themes here
+  )
+
+  let current-theme = themes.at(theme, default: themes.monokai)
+
+  //set text(font: font, size: 9pt, fill: text-color)
+  let code-lines = code.text.split("\n")
+  let line-count = code-lines.len()
+  
+  box(
+    width: 100%,
+    fill: background-color,
+    radius: radius,
+    stroke: (paint: background-color, thickness: 0.07em),
+    [
+      #box(
+        width: 100%,
+        height: 1.3em,
+        inset: 0.5em,
+        fill: header-color,
+        radius: (top-left: radius, top-right: radius),
+        [
+          #stack(dir: ltr, spacing: 0.4em)[
+            #circle(radius: 0.3em, fill: rgb("#ff5f56"))
+          ][
+            #circle(radius: 0.3em, fill: rgb("#ffbd2e"))
+          ][
+            #circle(radius: 0.3em, fill: rgb("#27c93f"))
+          ]
+        ]
+      )
+      #v(-10pt)
+      #pad(
+        bottom: 0.8em,
+        grid(
+          columns: (1em, auto),
+          column-gutter: 0.8em,
+          row-gutter: 0.4em,
+          ..code-lines.enumerate().map(((i, line)) => {
+            let row-symbol = if i == 0 { ">" } else { "" }
+            (
+              align(right + horizon, text(fill: header-color, size: 0.8em, row-symbol)),
+              [#raw(line, lang: "bash")],
+            )
+          }).flatten()
+        )
+      )
+    ]
+  )
+}
 
 #title-slide(
   title: [Advanced Linux],
@@ -108,6 +241,44 @@
   ][
 
   ]
+]
+
+#slide(title: "Deleteme")[
+  #carbon-snippet(
+    ```scala
+    trait Monad[F[_]]:
+      def pure[A](a: A): F[A]
+      def flatMap[A, B](fa: F[A])(f: A => F[B]): F[B]
+
+    object Monad:
+      def apply[F[_]](using F: Monad[F]): Monad[F] = F
+
+    given Monad[List] with
+      def pure[A](a: A): List[A] = List(a)
+      def flatMap[A, B](fa: List[A])(f: A => List[B]): List[B] =
+        fa.flatMap(f)
+    ```
+  )
+
+  Porco dio se sono belle le monadi
+]
+
+#slide(title: [Package Manager su Linux])[
+  #carbon-shell(
+    ```
+    yay -Syu
+
+    :: Synchronizing package databases...
+     core is up to date
+     extra is up to date
+     multilib is up to date
+    :: Starting full system upgrade...
+     there is nothing to do
+    :: Searching AUR for updates...
+    :: Searching databases for updates...
+
+    ```
+  )
 ]
 
 // =======================================================================================

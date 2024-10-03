@@ -193,7 +193,7 @@
 
 #slide(title: [Che cos'è un *Package Manager*?])[
   #only(1)[
-    Un #alert[package manager] è uno strumento (_software_) che permette di gestire l'installazione, la rimozione e l'aggiornamento di #underline[paccketti software] su un sistema operativo.
+    Un #alert[package manager] è uno strumento (_software_) che permette di gestire l'installazione, la rimozione e l'aggiornamento di #underline[pacchetti software] su un sistema operativo.
 
     I package manager possono essere:
       - #alert[grafici] --- consentono l'installazione di pacchetti tramite _interfaccia grafica_
@@ -201,7 +201,7 @@
   ]
 
   #only(2)[
-    Un #alert[package manager] è uno strumento (_software_) che permette di gestire l'installazione, la rimozione e l'aggiornamento di #underline[paccketti software] su un sistema operativo.
+    Un #alert[package manager] è uno strumento (_software_) che permette di gestire l'installazione, la rimozione e l'aggiornamento di #underline[pacchetti software] su un sistema operativo.
 
     I package manager possono essere:
       - #alert[grafici] --- consentono l'installazione di pacchetti tramite _interfaccia grafica_
@@ -239,47 +239,124 @@
       - #alert[informazioni su dipendenze]
       - ...
   ][
-
+    #figure(image("images/linux-packages.png", width: 61%))
   ]
 ]
 
-#slide(title: "Deleteme")[
-  #carbon-snippet(
-    ```scala
-    trait Monad[F[_]]:
-      def pure[A](a: A): F[A]
-      def flatMap[A, B](fa: F[A])(f: A => F[B]): F[B]
+#slide(title: [Prima dei package manager])[
+  Un tempo il software veniva installato dai suoi #alert[sorgenti], ovvero il codice sorgente del programma.
 
-    object Monad:
-      def apply[F[_]](using F: Monad[F]): Monad[F] = F
+  Tipicamente un file definiva le #alert[istruzioni di compilazione] e le #alert[dipendenze] necessarie per la compilazione.
 
-    given Monad[List] with
-      def pure[A](a: A): List[A] = List(a)
-      def flatMap[A, B](fa: List[A])(f: A => List[B]): List[B] =
-        fa.flatMap(f)
-    ```
-  )
+  Spettava all'utente *compilare* il software e gestire le eventuali *dipendenze*.
 
-  Porco dio se sono belle le monadi
+  #v(1em)
+
+  #align(center)[Questo processo era #alert[lungo], #alert[complesso] e #alert[tedioso].]
+  #align(center)[Altro annoso problema era #alert[l'aggiornamento del software].]
 ]
 
-#slide(title: [Package Manager su Linux])[
+#slide(title: [Gestione dei pacchetti con package manager])[
+  Per superare queste limitazioni, ogni distribuzione ha implementato un proprio #alert[formato di pacchetto] e un #alert[package manager] per la gestione dei pacchetti.
+
+  #side-by-side(columns: (2fr, auto), gutter: 2em)[
+    L'idea è quella di *semplificare* l'installazione e la gestione del software distribuendolo (principalmente) in forma binaria,
+    assieme a #alert[metadati] che descrivono il pacchetto e le sue dipendenze.
+  ][
+    #figure(image("images/source-code-comilation-vs-packaging.png", height: 55%))
+  ]
+]
+
+#slide(title: "Come funziona un package manager?")[
+  #figure(image("images/linux-package-manager-explanation.png"))
+]
+
+#slide(title: "Repository")[
+
+  #side-by-side(columns: (2fr, 1fr), gutter: 1em)[
+  (Quasi) tutte le distribuzioni Linux mantengono uno o più #alert[repository] ufficiali contenenti i pacchetti software.
+
+  I repository sono #alert[server] che contengono i pacchetti software e le informazioni necessarie per la loro installazione.
+
+  Esempio di repository: \
+  #link("http://archive.ubuntu.com/ubuntu/")[`http://archive.ubuntu.com/ubuntu/`]
+  ][
+    #figure(image("images/repository.png"))
+  ]
+]
+
+#slide(title: "Repository e metadati")[
+  I *repository* contengono, oltre ai pacchetti software, anche i #alert[metadati] necessari per la gestione degli stessi.
+
+  I #alert[metadati] sono informazioni che descrivono il pacchetto come:
+    - nome
+    - versione
+    - dipendenze
+    - descrizione
+]
+
+#slide(title: "Package manager e interazioni con repository")[
+  Il *package manager* inizialmente interagisce con i metadati, scaricando le informazioni necessarie per la gestione dei pacchetti e le salva in una #alert[cache locale].
+
+  Quando si richiede un aggiornamento, il *package manager* aggiorna la cache locale e confronta le informazioni con quelle presenti nel repository.
+
+  Quando si richiede l'installazione di un pacchetto, il *package manager* interroga la cache locale e quindi scarica il pacchetto dal repository.
+  Se il pacchetto ha delle dipendenze, queste vengono scaricate e installate automaticamente.
+]
+
+#slide(title: "Esempio installazione pacchetto")[
   #carbon-shell(
     ```
-    yay -Syu
+    sudo pacman -Syu freecad
 
-    :: Synchronizing package databases...
-     core is up to date
-     extra is up to date
-     multilib is up to date
-    :: Starting full system upgrade...
-     there is nothing to do
-    :: Searching AUR for updates...
-    :: Searching databases for updates...
+    resolving dependencies...
+    looking for conflicting packages...
 
+    Packages (35) asciidoctor-2.0.23-2  blosc-1.21.6-1 ... freecad-1.0rc1-1
+
+    Total Download Size:    239,66 MiB
+    Total Installed Size:  1128,19 MiB
+
+    :: Proceed with installation? [Y/n]
     ```
   )
 ]
+
+// #slide(title: "Deleteme")[
+//   #carbon-snippet(
+//     ```scala
+//     trait Monad[F[_]]:
+//       def pure[A](a: A): F[A]
+//       def flatMap[A, B](fa: F[A])(f: A => F[B]): F[B]
+
+//     object Monad:
+//       def apply[F[_]](using F: Monad[F]): Monad[F] = F
+
+//     given Monad[List] with
+//       def pure[A](a: A): List[A] = List(a)
+//       def flatMap[A, B](fa: List[A])(f: A => List[B]): List[B] =
+//         fa.flatMap(f)
+//     ```
+//   )
+// ]
+
+// #slide(title: [Package Manager su Linux])[
+//   #carbon-shell(
+//     ```
+//     yay -Syu
+
+//     :: Synchronizing package databases...
+//      core is up to date
+//      extra is up to date
+//      multilib is up to date
+//     :: Starting full system upgrade...
+//      there is nothing to do
+//     :: Searching AUR for updates...
+//     :: Searching databases for updates...
+
+//     ```
+//   )
+// ]
 
 // =======================================================================================
 // =======================================================================================

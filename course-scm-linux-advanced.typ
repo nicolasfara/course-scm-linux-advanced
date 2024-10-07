@@ -62,8 +62,6 @@
   radius: 0.7em,
   width: 100%,
 )
-#show table.cell: set text(size: 0.8em)
-
 
 #let carbon-snippet(
   code,
@@ -326,27 +324,38 @@
 
 == System integration: diverse possibilità
 
+#show table.cell: set text(size: 0.8em)
+
 #table(
-  columns: (1fr, 1fr, 2fr),
+  columns: (auto, auto, auto),
+  fill: (luma(250), green.transparentize(90%), red.transparentize(90%)),
   inset: 0.5em,
   table.header(
-    [], align(center)[*Pro*], align(center)[*Contro*]
+    [], align(center)[#text(green, weight: "bold")[Pro]], align(center)[#text(red, weight: "bold")[Contro]]
   ),
-  [Compilazione manuale], [
+  text(weight: "bold")[Compilazione manuale], [
     - Controllo totale
     - Flessibilità
-  ], [
+    - Formativo
+  ],
+  [
     - Problemi di dipendenze (dependecy hell)
     - Conoscenza approfondita del sistema
     - Compatibilità tra versioni
   ],
-  [Distribuzione binaria],[
+  [
+    #text(weight: "bold")[Distribuzione binaria] \
+    (debian, fedora, ecc.)
+  ],
+  [
     - Facile da creare
-  ], [
+  ],
+  [
     - Non disponibile per tutte le architetture
     - Molte dipendenze
+    - Difficile da ottimizzare
   ],
-  [Build system],
+  text(weight: "bold")[Build system],
   [
     - Estremamente flessibile
     - Pacchetti specifici per embedded
@@ -356,5 +365,20 @@
   [
     - Tempi di compilazione
   ]
-
 )
+
+== Linux Embedded: Principi
+#figure(image("images/linux-embedded-principles.png"))
+
+- Compilare da sorgenti --> elevata *flessibilità*
+- Cross-compilazione --> compilazione su un *sistema diverso* da quello target
+- "Ricette" per costruire componenti --> *facilità* di realizzazione
+
+== Build system per Linux Embedded
+
+- Ampio panorama: _Yocto/OpenEmbedded, Buildroot, PTXdist, OpenWRT_, ecc.
+- Ad oggi, *due* soluzioni sono tra le più popolari:
+  - *Yocto/OpenEmbedded* \ Creazione di distribuzioni Linux complete. #text(weight: "bold")[Molto potente] ma #underline[complesso].
+  - *Buildroot* \ Creazione di filesystem minimi, no pacchetti binari. Più #underline[semplice] da usare ma #text(weight: "bold")[meno flessibile].
+
+= Yocto Project: Overeview

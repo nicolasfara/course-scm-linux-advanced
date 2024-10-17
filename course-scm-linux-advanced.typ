@@ -204,79 +204,217 @@
 // =======================================================================================
 = Package Manager su distro Linux
 
-== Che cos'è un Package Manager?
-  Un *package manager* è uno strumento (_software_) che permette di gestire l'installazione, la rimozione e l'aggiornamento di #underline[pacchetti software] su un sistema operativo.
+== Installazione software su Linux
 
-  I package manager possono essere:
-    - *grafici* --- consentono l'installazione di pacchetti tramite _interfaccia grafica_
-    - *testuali* --- consentono l'installazione di pacchetti tramite _linea di comando_
+Quali opzioni si hanno per installare software su *Linux*?
 
-  #v(1em)
+- *Compilazione da sorgenti*
+  - Si richiede il download dei sorgenti
+  - Compilazione e installazione _manuale_
+  - Certe volte è semplice, mentre altre volte può essere un #b[incubo]
+  - A volte è una scelta #underline[obbligata]: solo i #b[sorgenti] sono disponibili
+- *Installazione di pacchetti precompilati*
+  - Il software può essere #b[pre-compilato] e distribuito per essere pronto per l'installazione
+  - I pacchetti dipendono dalle distribuzioni Linux:
+    - _Debian-based_ (come Ubuntu): distribuiscono pacchetti con estensione `.deb`
+    - _Red Hat-based_ (come Fedora): distribuiscono pacchetti con estensione `.rpm`
 
-  #align(center)[In questo corso ci concentreremo su package manager a *linea di comando*.]
+== Installazione da sorgenti
 
-  #only("1-")[
-    #figure(image("images/why-meme.png"))
-  ]
+- Download del codice sorgente
+  - attraverso #b[zip] oppure #b[rar]
+  - oppure attraverso #b[git] o #b[svn]
+- Il *README*, distribuito generalmente con il codice sorgente, contiene le istruzioni per la compilazione e l'installazione
+  - A volte contiene anche istruzioni su come personalizzare il software
+  - Definisce quelle che sono le #b[dipendenze] necessarie per la compilazione
 
+#pagebreak()
 
-== Perché la linea di comando?
-  Se a primo impatto può sembrare più complesso, l'utilizzo della _riga di comando_ per la gestione dei pacchetti ha diversi vantaggi:
+Per installare il software, tipicamente si seguono questi passaggi:
 
-  - *Velocità*: l'installazione di pacchetti è più veloce
-  - *Controllo*: maggiore controllo sulle operazioni
-  - *Automatizzazione*: possibilità di automatizzare le operazioni
+1. Applicare le #b[configurazioni] necessarie
+2. Individuare il `Makefile`
+  - Applicare le configurazioni con `make config`
+  - Compilare il software con `make`
+  - Installare il software con `make install`
 
-  Inoltre, la riga di comando è #alert[più leggera] e #alert[più flessibile] rispetto ad una GUI.
+Per effettuare questi passaggi, si assume che la *toolchain* sia installata sul sistema.
 
-
-== Pacchetti software
-  Un #alert[pacchetto software] è tipicamente una *applicazione* (GUI o CLI) o una *libreria* che può essere installata su un sistema operativo.
-
-  È un archivio che può contenere:
-
-    - #alert[binari]
-    - #alert[file di configurazione]
-    - #alert[documentazione]
-    - #alert[informazioni su dipendenze]
-    - ...
-    
-  #figure(image("images/linux-packages.png", width: 61%))
+I binari installati #b[potrebbero] non funzionare correttamente se richiedono _librerie_ o _dipendenze_ non presenti sul sistema.
 
 == Prima dei package manager
-  Un tempo il software veniva installato dai suoi #alert[sorgenti], ovvero il codice sorgente del programma.
-
-  Tipicamente un file definiva le #alert[istruzioni di compilazione] e le #alert[dipendenze] necessarie per la compilazione.
 
   Spettava all'utente *compilare* il software e gestire le eventuali *dipendenze*.
 
   #v(1em)
 
-  #align(center)[Questo processo era #alert[lungo], #alert[complesso] e #alert[tedioso].]
-  #align(center)[Altro annoso problema era #alert[l'aggiornamento del software].]
+  #align(center)[Questo processo era #b[lungo], #b[complesso] e #b[tedioso].]
+  #align(center)[Altro annoso problema era #b[l'aggiornamento del software].]
+
+
+// == Pacchetti software
+
+// - Un #b[pacchetto software] è un archivio che contiene:
+//   - #b[binari]
+//   - #b[file di configurazione]
+//   - #b[documentazione]
+//   - #b[informazioni su dipendenze]
+//   - ...
+
+// == Che cos'è un Package Manager?
+//   Un *package manager* è uno strumento (_software_) che permette di gestire l'installazione, la rimozione e l'aggiornamento di #underline[pacchetti software] su un sistema operativo.
+
+//   I package manager possono essere:
+//     - *grafici* --- consentono l'installazione di pacchetti tramite _interfaccia grafica_
+//     - *testuali* --- consentono l'installazione di pacchetti tramite _linea di comando_
+
+//   #v(1em)
+
+//   #align(center)[In questo corso ci concentreremo su package manager a *linea di comando*.]
+
+//   #only("1-")[
+//     #figure(image("images/why-meme.png"))
+//   ]
+
+
+// == Perché la linea di comando?
+//   Se a primo impatto può sembrare più complesso, l'utilizzo della _riga di comando_ per la gestione dei pacchetti ha diversi vantaggi:
+
+//   - *Velocità*: l'installazione di pacchetti è più veloce
+//   - *Controllo*: maggiore controllo sulle operazioni
+//   - *Automatizzazione*: possibilità di automatizzare le operazioni
+
+//   Inoltre, la riga di comando è #alert[più leggera] e #alert[più flessibile] rispetto ad una GUI.
+
+
+== Pacchetti software
+  Un *pacchetto software* è tipicamente una #b[applicazione] (GUI o CLI) o una #b[libreria] che può essere installata su un sistema operativo.
+
+  #components.side-by-side[
+  È un archivio che può contenere:
+    - binari
+    - file di configurazione specifici per l'applicazione
+    - documentazione
+    - informazioni su dipendenze (metadati)
+    - script per l'installazione e la rimozione del software
+    - ...
+  ][
+    #figure(image("images/linux-packages.png", width: 75%))
+  ]
+
+== Formato nome file pacchetto
+
+  #align(center)[
+  `<nome>_<versione>-<rev>_<arch>.deb`
+  ]
+
+  #v(1em)
+
+  - `<nome>`: nome del pacchetto eventualmente separato da `-`
+  - `<versione>`: versione del pacchetto, solitamente numerica nel formato `major.minor.patch` (#link("https://semver.org/"))
+  - `<rev>`: revisione del pacchetto (assegnata dal distributore)
+  - `<arch>`: architettura del pacchetto (es. `amd64`, `i386`, `arm64`, ecc.)
+
+  #align(center)[Ad esempio: `firefox_91.0-1_amd64.deb`]
+
+  #v(1em)
+
+  Ogni *distribuzione* Linux ha un #underline[proprio] formato per la nomenclatura dei pacchetti.
+
+== Installare un `.deb` -- esempio
+
+  Per installare un pacchetto `.deb` si fa uso del comando `dpkg`:
+
+  ```bash
+  $ sudo dpkg -i <pacchetto-completo>.deb
+  ```
+
+  Ad esempio, se abbiamo un pacchetto `firefox_91.0-1_amd64.deb`:
+
+  ```bash
+  $ sudo dpkg -i firefox_91.0-1_amd64.deb
+  ```
+
+  Per rimuovere un pacchetto `.deb` occorre specificare #underline[solo] il nome del pacchetto:
+
+  ```bash
+  $ sudo dpkg -r <pacchetto>
+  ```
+  Ad esempio, per rimuovere Firefox:
+
+  ```bash
+  $ sudo dpkg -r firefox
+  ```
+
+  #pagebreak()
+
+  Per mostrare tutti i pacchetti installati:
+  
+  ```bash
+  $ dpkg --list
+  ```
+
+  Per mostrare i file all'interno di un pacchetto `.deb`:
+
+  ```bash
+  $ dpkg -L <pacchetto>
+  ```
+
+  Per determinare se un pacchetto è installato:
+
+  ```bash
+  $ dpkg --status <pacchetto>
+  ```
+
+  Per scoprire quale pacchetto ha installato un certo file:
+
+  ```bash
+  $ dpkg --search <file>
+  ```
+
+  `dpkg` mantiene le informazioni sui pacchetti installati in `/var/lib/dpkg`:
+    - `/var/lib/dpkg/status`: informazioni sui pacchetti installati
+    - `/var/lib/dpkg/available`: informazioni sui pacchetti disponibili
+
+== Bene ma non benissimo...
+
+  Come abbiamo appena visto `dpkg` è un ottimo strumento per installare pacchetti `.deb`, ma ha un #b[grande limite]:
+
+  - Non gestisce le *dipendenze* dei pacchetti
+    - Molti pacchetti richiedono altri pacchetti per funzionare correttamente
+    - Un pacchetto `A` può richiedere una certa versione di un pacchetto `B`
+    - L'utente deve controllare manualmente le dipendenze e installarle
+    - Questo processo è #underline[complicato] e #underline[propenso ad errori]
+  - Abbiamo bisogno di un too di "alto livello" che gestisca le dipendenze in modo automatico
+    - Deve essere in grado di recuperare le dipendenze richieste
+    - Deve effettuare le installazioni richieste
+    - Deve installare i pacchetti richiesti
+    - Tutto il processo deve essere #underline[automatico] e trasparente
 
 == Gestione dei pacchetti con package manager
-  Per superare queste limitazioni, ogni distribuzione ha implementato un proprio #alert[formato di pacchetto] e un #alert[package manager] per la gestione dei pacchetti.
+  Ogni distribuzione ha implementato un proprio #underline[formato di pacchetto] e un #underline[package manager] per la gestione dei pacchetti.
 
   L'idea è quella di *semplificare* l'installazione e la gestione del software distribuendolo (principalmente) in forma binaria,
-  assieme a #alert[metadati] che descrivono il pacchetto e le sue dipendenze.
+  assieme a #b[metadati] che descrivono il pacchetto e le sue dipendenze.
 
   #figure(image("images/source-code-comilation-vs-packaging.png", height: 55%))
 
-== Come funziona un package manager?"
+== Come funziona un package manager?
   #figure(image("images/linux-package-manager-explanation.png"))
 
-== Repository"
+== Repository
   (Quasi) tutte le distribuzioni Linux mantengono uno o più #alert[repository] ufficiali contenenti i pacchetti software.
 
-  I repository sono #alert[server] che contengono i pacchetti software e le informazioni necessarie per la loro installazione.
+  #components.side-by-side(columns: (2fr, 1fr))[
+    I repository sono #alert[server] che contengono i pacchetti software e le informazioni necessarie per la loro installazione.
+    
+    Esempio di repository: \
+    #link("http://archive.ubuntu.com/ubuntu/")[`http://archive.ubuntu.com/ubuntu/`]
+  ][
+    #figure(image("images/repository.png", width: 60%))
+  ]
 
-  Esempio di repository: \
-  #link("http://archive.ubuntu.com/ubuntu/")[`http://archive.ubuntu.com/ubuntu/`]
-
-  #figure(image("images/repository.png"))
-
-== Repository e metadati"
+== Repository e metadati
   I *repository* contengono, oltre ai pacchetti software, anche i #alert[metadati] necessari per la gestione degli stessi.
 
   I #alert[metadati] sono informazioni che descrivono il pacchetto come:

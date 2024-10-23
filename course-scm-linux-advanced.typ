@@ -447,6 +447,61 @@ I binari installati #b[potrebbero] non funzionare correttamente se richiedono _l
   :: Proceed with installation? [Y/n]
   ```
 
+#focus-slide[
+  *Advanced Package Tool* (`APT`)
+]
+
+== APT: Advanced Package Tool
+
+- *APT* è un package manager per sistemi Debian-based (come Ubuntu)
+- È un'interfaccia a riga di comando per il sistema di gestione dei pacchetti di Debian
+- Si compone di più strumenti:
+  - `apt-get` (o `apt`): strumento principale per la gestione dei pacchetti
+  - `apt-cache`: strumento per la ricerca delle informazioni sui pacchetti
+  - `apt-key`: strumento per la gestione delle chiavi di autenticazione
+  - `apt-config`: strumento per la configurazione di APT
+
+== Vantaggi di APT
+
+- Nasconde (in senso positivo) molti dettagli #b[superflui] all'utente
+  - L'utente non deve preoccuparsi di *scaricare* le dipendenze
+  - L'utente non deve preoccuparsi del *nome dei file* del pacchetto o la *versione* di rilascio
+  - Deve #b[solo] sapere il *nome del pacchetto* da installare
+  - Non deve preoccuparsi di *gestire le dipendenze* manualmente
+  - Tutto è eseguito in modo *trasparente* e *automatico*
+
+== Installazione di un pacchetto con APT
+
+- Per installare un certo programma o libreria, tutto quello che serve è sapere il *nome del pacchetto*.
+- Se non si conosce il nome del pacchetto si possono adottare diverse strategie:
+  - Utlizzo del comando `apt-cache search <nome>`
+  - Utilizzo del comando `apt search <nome>`
+  - Ricerca su internet
+- Per installare un pacchetto si utilizza il comando `sudo apt install <nome>`
+- L'installazione include:
+  - Identificazione dell'ultima versione del pacchetto da installare
+  - Identificazione di pre-requisiti e dipendenze
+  - Verifica dello spazio su disco
+  - Conferma dell'installazione
+  - Eesecuzione dell'installazione
+
+== Repository APT
+
+- Come visto in precedenza, i package manager interagiscono con i #b[repository] per scaricare i pacchetti.
+- I repository APT sono configurati in `/etc/apt/sources.list` e `/etc/apt/sources.list.d/`
+- Questi file contengono le liste degli URL dei repository *ufficiali* e *non ufficiali* che APT deve interrogare per scaricare i pacchetti
+
+== Esempio repository Ubuntu
+
+- *Ubuntu* fornisce i propri repository ufficiali
+- Gli URL dei server *mirrors* sono elencati nel file `/etc/apt/sources.list`
+- I pacchetti software su ubuntu sono divisi in 4 categorie:
+  - #b[Main]: contiene software open source supportato direttamente da ubuntu
+  - #b[Universe]: contiene "tutto" il software open source non supportato direttamente da ubuntu
+  - #b[Multiverse]: contiene software *non* open source (installabile sotto propria responsabilità)
+  - #b[Restricted]: contiene software che non è open source ma è supportato da ubuntu (es. driver proprietari)
+
+
 // =================================== Linux Embedded ====================================
 // =======================================================================================
 

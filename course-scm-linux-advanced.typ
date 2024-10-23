@@ -501,6 +501,87 @@ I binari installati #b[potrebbero] non funzionare correttamente se richiedono _l
   - #b[Multiverse]: contiene software *non* open source (installabile sotto propria responsabilità)
   - #b[Restricted]: contiene software che non è open source ma è supportato da ubuntu (es. driver proprietari)
 
+== /etc/apt/sources.list
+
+- Gli strumenti di `apt` usano questo file per identificare la lista di repository da cui scaricare i pacchetti
+- L'utente può #b[modificare] questo file per aggiungere (o rimuovere) repository
+- Il file contiene una lista di #b[URL] che partono con:
+  - `deb`: URL per i pacchetti binari
+  - `deb-src`: URL per i pacchetti sorgenti
+  - seguiti da:
+    - *nome* della distribuzione e *suite* (`updates`, `backport`, ecc.)
+    - *componente* (`main`, `universe`, ecc.)
+
+Nota: per scoprire il nome della #b[distribuzione] si può usare il comando: \
+```$ lsb_release -sc```
+
+== Modificare `/etc/apt/sources.list`
+
+- Per modificare il file `sources.list` si può usare un editor di testo (esempio `nano`):
+  - `$ sudo nano /etc/apt/sources.list`
+  - Si aggiunge o rimuove gli URL dei repository
+  - Si salva il file e si esce dall'editor
+- Tuttavia, è *fortemente* consigliato usare il comando `add-apt-repository` per aggiungere repository
+  - `$ sudo add-apt-repository <repository>`
+  - Questo comando aggiunge l'URL del repository al file `sources.list`
+  - Esempio: `$ sudo add-apt-repository ppa:libreoffice/ppa`
+
+L'aggiornamento del file `sources.list` non comporta l'aggiornamento automatico della cache di APT.
+Per rendere effettive le modifiche, è necessario *aggiornare* il database dei pacchetti `apt`.
+
+== Aggiornamento database pacchetti
+
+- Per aggiornare il database dei pacchetti si usa il comando `apt update`
+- Questo comando accede al file `/etc/apt/sources.list` e scarica le informazioni sui pacchetti disponibili nei repository
+- Per ogni pacchetto:
+  - Recupera #b[l'ultimo] numero di versione
+  - Recupera le informazioni sui pacchetti e le #b[dipendenze]
+  - Recupera la #b[dimensione] del pacchetto
+- Costruisce il database interno con queste informazioni
+- Quando è richiesta un'installazione, APT usa il *database* per scaricare i pacchetti
+- Per questo motivo, è *importante* eseguire `apt update` prima di installare un pacchetto
+
+== Aggiornamento dei pacchetti installati
+
+- Il comando `apt upgrade` aggiorna i pacchetti installati
+- Questo comando:
+  - Controlla il database interno
+  - Confronta le versioni dei pacchetti installati con le versioni disponibili nel database
+  - Se ci sono versioni più *recenti*, scarica e installa le nuove versioni
+  - Se una nuova versione ha un conflitto, *non procederà* con l'aggiornamento
+
+Dal momento che questo comando utilizza il database interno, è *importante* eseguire `apt update` #b[prima] di eseguire `apt upgrade`.
+
+== Aggiornamento dei pacchetti installati (`dist-upgrade`)
+
+- Il comando `apt dist-upgrade` è simile a `apt upgrade` ma con una differenza:
+  - se `apt dist-upgrade` rileva che l'aggiornamento di un pacchetto richiede la rimozione di un altro pacchetto, *lo farà*
+  - ciò significa che alcuni pacchetti potrebbero essere *installati* o *rimossi* durante l'aggiornamento
+- Per sapere quali azioni dovranno essere prese da `apt` prima di procedere, si può usare il comando `apt check`
+  - Questo comando aggiorna la cache e verifica se ci sono potenziali dipendenze rotte
+
+== Rimozione di un pacchetto
+
+- Per rimuovere un pacchetto si usa il comando `apt remove <nome>`
+  - questo comando *preserva* i file di configurazione (per eventuali reinstallazioni)
+- Per rimuovere un pacchetto e i file di configurazione si usa il comando `apt purge <nome>`
+- Per rimuovere un pacchetto e le #underline[dipendenze] non più necessarie si usa il comando `apt autoremove`
+
+== Ottenere informazioni sui pacchetti
+
+- Per ricercare un pacchetto tramite #b[keyword]: `apt search <keyword>`
+- Per ottenere #b[informazioni] su un pacchetto: `apt show <nome_pacchetto>`
+- Per ottenere la lista di *tutti* i pacchetti installati: `apt list --installed`
+- Per ottenere la #b[policy] di un pacchetto: `apt policy <nome_pacchetto>`
+
+== Archivio dei pacchetti `/var/cache/apt/archives`
+
+- I pacchetti scaricati da APT sono salvati in `/var/cache/apt/archives`
+- Quando si installa un pacchetto, `apt` scarica il pacchetto e lo salva in questa directory
+- Certe volte i pacchetti scaricati possono essere di #b[grandi dimensioni], quindi per salvare spazio su disco si possono rimuovere i pacchetti da questa directory:
+  - `$ sudo apt autoclean` rimuove i pacchetti obsoleti
+  - `$ sudo apt clean` rimuove tutti i pacchetti scaricati (anche quelli attualmente installati)
+    - Nota: questo comando rimuove i pacchetti scaricati, ma *non* i pacchetti installati
 
 // =================================== Linux Embedded ====================================
 // =======================================================================================

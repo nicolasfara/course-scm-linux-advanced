@@ -583,6 +583,63 @@ Dal momento che questo comando utilizza il database interno, è *importante* ese
   - `$ sudo apt clean` rimuove tutti i pacchetti scaricati (anche quelli attualmente installati)
     - Nota: questo comando rimuove i pacchetti scaricati, ma *non* i pacchetti installati
 
+
+#focus-slide[*Esercitazione*: `01-apt`]
+
+== Gestione di più versioni di un pacchetto
+
+Spesso può essere necessario installare *più versioni* di un pacchetto sullo stesso sistema:
+
+- Potremo aver bisogno di una version più #b[vecchia] per motivi di #b[compatibilità]
+- Se siamo sviluppatori potremo voler sviluppare e testare il nostro software con #b[più versioni] di una libreria
+- Semplicemente vogliamo diverse versioni di un software
+
+== Introduzione a `update-alternatives`
+
+- `update-alternatives` è uno strumento che permette di gestire #b[più versioni] di un programma sullo stesso sistema
+- Le #b[alternative] sono diversi programmi o file che forniscono la stessa funzionalità
+- `update-alternatives` permette di #b[selezionare] quale "alternativa" usare come *predefinita* sul sistema
+
+== Come funziona `update-alternatives`
+
+- Il comando `update-alternatives` mantiene un database di alternative disponibili installate nel sistema
+- Ogni alternativa ha un #b[nome simbolico] e un set di programmi o file associati
+- `update-alternatives` permette di #b[selezionare] quale alternativa usare come predefinita
+  - con il comando `update-alternatives --list` si ottiene la lista delle alternative disponibili
+  - con il comando `update-alternatives --config` si seleziona l'alternativa da usare
+
+== Casi d'uso di `update-alternatives`
+
+- Gestione di versioni multiple dello stesso software (es. Python, GCC, editor, ecc.)
+- Consente di cambiare in modo *agile* la versione da utilizzare senza dover manualmente intervenire sui file di sistema
+
+== Vantaggi di `update-alternatives`
+
+- #b[Semplifica] la gestione di più versioni dello stesso software
+- Permette agli utenti di #b[scegliere facilmente] l'alternativa predefinita senza modifiche manuali
+- Mantiene un database *centralizzato* delle alternative disponibili
+- Consente di *aggiungere* o *rimuovere* alternative in modo *sicuro* senza influire sugli altri programmi
+
+== Utilizzo di `update-alternatives`
+
+Anzitutto, per verificare se il `update-alternatives` è installato sul sistema, si può usare il comando:
+```bash
+$ update-alternatives --version
+update-alternatives version 1.22.6.
+
+This is free software; see the GNU General Public License version 2 or
+later for copying conditions. There is NO warranty.
+```
+
+== Esempio dell'editor
+
+- Un esempio comune di utilizzo di `update-alternatives` è la gestione di #b[editor di testo]
+- Possiamo controllare quale editor di default viene utilizzato e vedere quali alternative abbiamo
+
+```bash
+$ update-alternatives --list editor
+```
+
 // =================================== Linux Embedded ====================================
 // =======================================================================================
 

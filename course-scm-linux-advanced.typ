@@ -640,6 +640,114 @@ later for copying conditions. There is NO warranty.
 $ update-alternatives --list editor
 ```
 
+#focus-slide[*Esercitazione*: `02-update-alternatives`]
+
+== Alpine Package Manager: `apk`
+
+- *Alpine Linux* è una distribuzione Linux leggera e sicura
+- `apk` è il package manager di Alpine Linux
+- È un package manager #b[semplice] e #b[veloce] che permette di installare, aggiornare e rimuovere pacchetti
+- Disponibile attraverso il pacchetto `apk-tools`
+
+== Repository di Alpine Linux
+
+Come visto in precedenza per APT, anche `apk` interagisce con i repository per scaricare i pacchetti.
+
+- `apk` recupera le informazioni sui pacchetti  da diversi #b[mirrors], i quali contengono diversi repository.
+- A volte i termini *mirror* e *repository* vengono usati in modo intercambiabile, ma in realtà sono due cose diverse:
+  - #b[mirror]: è un server che contiene più repository
+  - #b[repository]: è una raccolta di pacchetti software e metadati
+  - #b[release]: è una collezione di snapshot di vari repository
+
+== Repository di Alpine Linux
+
+Attualmente Apline Linux mette a disposizione *tre* repository principali:
+
+- `main`: contiene i pacchetti ufficiali di Alpine Linux e che ragionevolmente ha senso trovare di base nella distro
+- `community`: contiene pacchetti proveninenti dal repository `testing` che sono stati testati e sono pronti per l'uso
+- `testing`: contiene pacchetti potenzialmente rotti, instabili o sotto test (questo repository è disponibile solo sulla release `edge`)
+
+== Release di Alpine Linux
+
+Alpine Linux fornisce due tipi principali di release:
+
+- #b[Stable]: è la release principale e contiene pacchetti stabili e testati.
+  Rilasciata ogni 6 mesi e ogni release stabile ha i suoi repository `community` e `main`. Il repository `main` viene supportato per 2 anni.
+- #b[Edge]: è la release "rolling" e include nuovi pacchetti compilati dal branch `master` dei propri repository di riferimento.
+  Considerata meno stabile rispetto alla release `stable`, ma stabile abbastanza per l'uso quotidiano o se si necessita di software più recenti.
+
+== Configurazione repository
+
+- I repository di Alpine Linux sono configurati in `/etc/apk/repositories`
+- Ogni riga di questo file contiene un *URL di un repository*
+- Il formato della riga è il seguente: \
+   `[@tag] [protocol][/path][/release]/<repository>`
+
+```bash
+# comments look like so. valid examples below
+http://dl-cdn.alpinelinux.org/alpine/edge/main 
+@testing http://dl-cdn.alpinelinux.org/alpine/edge/testing 
+/var/apk/my-packages
+```
+
+== Ricerca dei pacchetti
+
+Per cercare un pacchetto su Apline Linux si può procedere in due modi:
+
+- Tramite interfaccia web: #b[#link("https://pkgs.alpinelinux.org")]
+- Tramite il comando `apk search <keyword>`
+
+```bash
+apk search libsqlite3.so 
+apk search consul 
+apk search -e vim 
+apk search -e so:libsqlite3.so.* 
+```
+
+== Installazione di un pacchetto
+
+Installare un pacchetto comporta interrogare il repository, scaricare il pacchetto e le sue dipendenze, e installare il pacchetto.
+
+I file esistenti possono essere sovrascritti *ad eccezione* dei file di configurazione in `/etc`.
+In questo caso, i file verranno rinominati con l'estensione `.apk-new` (preservando i precedenti).
+
+Per installare un nuovo pacchetto si usa il comando `apk add <nome_pacchetto>`.
+
+```bash
+apk add busybox-extras 
+apk add bash zsh 
+```
+
+== Aggiornamento dei pacchetti
+
+Per aggiornare i pacchetti installati si usa il comando `apk upgrade`.
+
+In verità questo comando è composto da due comandi:
+- `apk update`: aggiorna il database dei pacchetti
+- `apk upgrade`: aggiorna i pacchetti installati
+
+```bash
+apk upgrade
+```
+
+
+== Rimozione di un pacchetto
+
+Per rimuovere un pacchetto si usa il comando `apk del <nome_pacchetto>`.
+
+Il suo funzionamento è speculare a `apk add`.
+
+Diversi package manager hanno funzionalità dedicate per il "cleanup" dei pacchetti installati.
+Ad esempio `apt` ha il comando `autoremove` per cancellare la cache dei pacchetti.
+Con `apk` questo viene fatto automaticamente alla rimozione del pacchetto.
+
+```bash
+apk del bash
+```
+
+#focus-slide[*Esercitazione*: `03-apk`]
+
+
 // =================================== Linux Embedded ====================================
 // =======================================================================================
 

@@ -747,6 +747,89 @@ apk del bash
 
 #focus-slide[*Esercitazione*: `03-apk`]
 
+= Server Grafici: Xorg e Wayland
+
+// https://theswissbay.ch/pdf/Gentoomen%20Library/Misc/O%27Reilly%20X%20Power%20Tools.pdf
+
+== Il Sistema X Window
+
+#quote("The X Window System is a portable, network-based display system")
+
+Questa definizione porta con sé tre delle caratteristiche principali di X:
+- *Portabile*: il sistema di finestre X è primarimente utilizzato su sistemi Unix-like, ma è stato portato su molte altre piattaforme
+  come Windows, macOS, e persino su dispositivi embedded. Supporta diverse architetture hardware.
+- *Network-based*: X è un sistema client-server, il che significa che un'applicazione che disegna una finestra è il client, mentre il server
+  è responsabile di disegnare la finestra sullo schermo. Questo permette di eseguire applicazioni grafiche su un computer remoto.
+- *Display system*: X non è una GUI, ma fonisce le #b[fondamenta] per costruirle. Consente di sviluppare GUI senza preoccuparli dell'hardware
+  sottostante e concentrarsi sugli aspetti grafici.
+
+== Storia del Sistema X Window
+
+- *Origini*:
+  - Creato al MIT nel 1984 come parte del Progetto Athena.
+  - Basato sul W Window System di Stanford.
+  - Attirò presto l'interesse dei vendor Unix per facilitare lo sviluppo di applicazioni grafiche cross-platform.
+
+- *Adozione e Licenze*:
+  - 1987: rilascio di X11 sotto licenza MIT.
+  - Creazione del X Consortium, un gruppo neutrale per gestire lo sviluppo, uno dei primi esempi di collaborazione open source (prima dell'uso del termine "open source").
+
+#pagebreak()
+
+- *Sviluppo e Crescita*:
+  - Il controllo di X passò di mano diverse volte fino al 1999, quando X.org fu istituito dal The Open Group.
+  - Nel 1992, X386 (poi rinominato XFree86) divenne una popolare implementazione di X per PC, con innovazioni che avvenivano fuori dai canali ufficiali.
+
+- *Transizione verso X.org Foundation*:
+  - 2003: dispute di licenza e problemi interni portarono alcuni sviluppatori a passare da XFree86 a X.org.
+  - 2004: Il server X.org venne adottato diffusamente nelle distribuzioni open source, rivitalizzando lo sviluppo attivo della comunità X.
+
+- *Eredità*:
+  - Il server X.org sostituì XFree86, diventando l'implementazione principale del sistema X e avanzando la tecnologia X Window all'interno di una comunità open source rinvigorita.
+
+== X e altri nomi
+
+Spesso troviamo il sistema X Window riferito con diversi nomi:
+- _X_
+- _X Window System_
+- _X version 11_
+- _X Window System, version 11_
+- _X11_
+
+Il numero di versione non è mai riferito nell'uso moderno,
+dal momento che le versioni precedenti erano *sperimentali* e la version 11 è in uso da quasi un ventennio.
+
+Vista la dominanza dell'implementazione _X.org_ ha portato diverse persone a riferirsi al sistema come #b[Xorg].
+
+== Architettura di X
+
+#slide[
+  #only("1")[
+    In _Unix_ è tradizione fornire soluzioni composte da #b[piccoli programmi],
+    piuttosto che da un singolo programma #b[monolitico].
+
+    Le GUI basate su X seguono questa filosofia: sono costruite in *layer* che possono essere combinati in base alle esigenze.
+  ]
+  #only("2")[
+    Gli elementi #b[in cima] sono più vicini all'utente, mentre quelli #b[in basso] sono più vicini all'hardware.
+
+    Dal basso verso l'alto:
+    - *Network Transport*: abilita la comunicazione con gli altri layer. Basato su TCP/IP più uno schema di comunicazione veloce per clinet locali.
+    - *X Window System*: software per gestire lo schermo (mouse, tastiera e video) ed eseguito sul computer connesso all'hardware del display. I layer sopra sono considerati #b[client].
+  ]
+  #only("3")[
+    - *Display Manager*: consente all'utente di accedere al sistema in modo grafico.
+    - *Session Manager*: traccia lo stato delle applicazioni tra varie sessioni di login. Avvia il window manager e il desktop environment. Riavvia le applicazioni in caso di crash.
+    - *Window and Compositing Manager*: gestisce il piazzamento delle finestre sullo schermo e la decorazione delle finestre. Se abilitata l'estensione COMPOSITE il window manager agisce come compositing manager.
+  ]
+  #only("4")[
+    - *Desktop Environment*: un insieme di applicazioni che forniscono un'interfaccia grafica coerente. Include menu per avviare programmi, trays o pannelli, ...
+    - *Application Clients*: applicazioni che disegnano le finestre sullo schermo. Possono essere applicazioni grafiche, terminali, ecc.
+    - *Toolkit*: programmi o librerie per semplificare lo sviluppo di client che comunicano con un server X. Non è un vero e proprio layer, ma semplifica lo sviluppo dei layer #b[client].
+  ]
+][
+  #figure(image("images/xorg-architecture.png"))
+]
 
 // =================================== Linux Embedded ====================================
 // =======================================================================================

@@ -831,6 +831,47 @@ Vista la dominanza dell'implementazione _X.org_ ha portato diverse persone a rif
   #figure(image("images/xorg-architecture.png"))
 ]
 
+== Dov'è il server X?
+
+Nella terminologia di _rete_, il sistema #b[client] è quello che è eseguito sul proprio computer,
+mentre il #b[server] è "qualcosa" da qualche altra parte.
+
+Nella terminologia di *X*,
+il proprio computer esegue il #b[server],
+mentre i #b[client] (applicazioni grafiche) possono risedere "altrove".
+
+Le risorse gestire dal server X includono:
+- *Schede video*
+- *Pointing devices*: mouse, tastiera, touchpad, ...
+- *Tastiere*
+
+== Perché finestre appaiono e agiscono differentemente?
+
+I *client* possono essere collocati nella stessa macchina del server, oppure in una macchina remota.
+
+Uno degli obiettivi iniziali di *X* era quello di fornire un meccanismo per #underline[implementare] le GUI,
+ma non impone alcuna #b[politica] su come queste devono operare.
+
+Questo significa che:
+- Il _look and feel_ è lasciato a toolkit grafici (GTK, Qt, ecc.) generando #b[diversità] di stili
+- Il vantaggio è che si può #b[sperimentare] e #b[innovare]
+
+#figure(image("images/xorg-different-look.png", width: 50%))
+
+Notare che la *title bar*, i *bordi* e i *controlli della finestra* sono uguali in quanto gestiti dal #b[window manager].
+
+== Display e Monitor
+
+In termini *X*, un #b[display] rappresenta l'interfaccia utente per una persona, solitamente costituita da una *tastiera*, un *puntatore*, una *scheda video* e un *monitor*.
+
+Tuttavia, per alcune applicazioni è necessario più *spazio video*; quindi, un #b[display] può includere più schede video e monitor con _capacità_ e _risoluzioni_ diverse.
+
+Tutte le schede e i monitor di un display possono essere combinati per agire come un unico grande monitor, un approccio chiamato *Xinerama*.
+Xinerama permette di estendere le *finestre* su più monitor e funziona particolarmente bene su schermi #b[LCD multipannello], #b[pareti video] o #b[videoproiettori].
+
+== Specifica del Display (1.12)
+
+
 // =================================== Linux Embedded ====================================
 // =======================================================================================
 

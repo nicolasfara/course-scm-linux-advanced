@@ -869,7 +869,26 @@ Tuttavia, per alcune applicazioni è necessario più *spazio video*; quindi, un 
 Tutte le schede e i monitor di un display possono essere combinati per agire come un unico grande monitor, un approccio chiamato *Xinerama*.
 Xinerama permette di estendere le *finestre* su più monitor e funziona particolarmente bene su schermi #b[LCD multipannello], #b[pareti video] o #b[videoproiettori].
 
-== Specifica del Display (1.12)
+== Specifica del Display
+
+Dal momento che un server X può essere raggiunto da qualunque parte della rete,
+occorre un modo per specificare *quale display* si vuole usare.
+
+#align(center)[`host:display[.screen]`]
+
+- `:0` rappresenta il display 0 in locale utilizzando uno #b[schema di connessione locale]
+- `localhost:0` è equivalente a `:0` ma la connessione avviene tramite #b[TCP/IP]
+- `172.250.12.7:4.3` rappresenta il display 4 schermo 3 su un host remoto
+
+#pagebreak()
+
+La specifica del display può essere definita in vari modi:
+- tramite il flag `-display` di un'applicazione X come `xterm -display <spec>`
+- tramite la variabile d'ambiente `DISPLAY` come `export DISPLAY=<displayspec>`
+
+Se la variabile d'ambiente `DISPLAY` è impostata, le applicazioni X la useranno per connettersi al server X.
+
+Notare che l'opzione `-display` ha la precedenza sulla variabile d'ambiente.
 
 
 // =================================== Linux Embedded ====================================

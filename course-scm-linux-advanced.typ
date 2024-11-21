@@ -892,6 +892,153 @@ Se la variabile d'ambiente `DISPLAY` è impostata, le applicazioni X la useranno
 
 Notare che l'opzione `-display` ha la precedenza sulla variabile d'ambiente.
 
+== Eseguire X in locale
+
+Un server *X* può essere eseguito in diversi modi per coprire le diverse esigenze.
+
+Il modo più semplice è eseguire il comando:
+```bash
+$ X
+```
+
+Di default, il server X si avvia sul display `:0` e si connette al display locale.
+
+Nel caso in cui il display `:0` sia già in uso, verrà generato un #b[errore].
+
+Per cambiare il display si può usare il comando:
+
+```bash
+$ X :1
+```
+
+È altresì possibile specificare un file di configurazione con il flag `-config`:
+
+```bash
+$ X -config /etc/X11/xorg.conf
+```
+
+#b[Nota]: eseguire il server in questo modo non esegue alcuna applicazione #underline[client].
+
+== Utilizzo di un Display Manager per avviare X
+
+Uno dei possibili #underline[layer] di una GUI basata su *X* è il #b[Display Manager].
+
+Generalmente configurato per avviare uno i più #b[Server X locali] e fornire un'interfaccia grafica per #underline[l'accesso all'utente].
+
+Una volta autenticato l'utente,
+questo fa partire alcuni client come il *Window Manager* e il *Desktop Environment*.
+
+Alcuni esempi di #b[Display Manager] sono:
+
+- `gdm` (GNOME Display Manager)
+- `kdm` (KDE Display Manager)
+- `lightdm` (Light Display Manager)
+- `xdm` (X Display Manager)
+- `sddm` (Simple Desktop Display Manager)
+
+== Avvio Display Manager via init system
+
+In orami quasi tutte le distribuzioni come _Fedora_, _Manjaro_ (Arch) e _Ubuntu_,
+il display manager viene avviato tramite il #b[init system] (es. `systemd`):
+
+```bash
+$ systemctl cat sddm  
+
+# /usr/lib/systemd/system/sddm.service
+[Unit]
+Description=Simple Desktop Display Manager
+Documentation=man:sddm(1) man:sddm.conf(5)
+Conflicts=getty@tty1.service
+After=systemd-user-sessions.service getty@tty1.service plymouth-quit.service systemd-logind.service
+PartOf=graphical.target
+StartLimitIntervalSec=30
+StartLimitBurst=2
+
+[Service]
+ExecStart=/usr/bin/sddm
+Restart=always
+
+[Install]
+Alias=display-manager.service
+```
+
+== Avviare un server X solo quando necessario
+
+In alcuni casi, può essere utile avviare un server X *solo quando necessario*.
+
+Ad esempio se si tratta di una macchina dedicata per servizi di rete potrebbe essere comodo avviare una sessione grafica per #b[amministrare il sistema].
+
+L'utility `xinit` permette di avviare un server X e i client specificati, ma il wrapper `startx` fornisce una interfaccia più semplice. Dopo il login in una sessione testuale:
+
+```bash
+$ startx
+```
+
+Consente di specificare quali #b[client] avviare e quali opzioni passare al server X,
+separati da `--`:
+
+```bash
+$ startx /usr/bin/xterm -- :1 -config /etc/X11/xorg.conf
+```
+
+== File `.xinitrc`
+
+Se non si specificano client da avviare con `startx`, il server X cercherà un file `.xinitrc` nella home directory dell'utente.
+
+Questo file contiene una lista di *comandi da eseguire* per avviare i client.
+
+Ad esempio, per avviare un terminale e un window manager:
+
+```bash
+$ cat ~/.xinitrc
+
+# Start a terminal
+/usr/bin/X11/xterm &
+
+# Start a window manager
+exec gnome-session
+```
+
+== Eseguire X dentro X
+
+Potrebbe essere scomodo dover continuamnete cambiare #b[VT] quando si vuole testare un setup di X.
+
+Per evitare questo problema, si può eseguire un *server X dentro un altro server X*.
+
+Per fare ciò, si usa il comando `Xnest`:
+
+```bash
+$ Xnest :1
+```
+
+È necessario specificare il display su cui si vuole eseguire il server X per #underline[evitare conflitti].
+
+#pagebreak()
+
+Per avviare `Xnest` con un client specifico si può fare uso del comando `startx`:
+
+```bash
+$ startx /usr/bin/xterm -- /usr/bin/Xnest :1
+```
+
+Dal momento che `Xnest` non interagisce direttamente con l'hardware,
+è possibile specificare una dimansione dello schermo arbitraria:
+
+```bash
+$ Xnest -geometry 800x600 :1
+```
+
+Una alternativa più moderna a `Xnest` è `Xephyr`:
+
+```bash
+$ Xephyr -br -ac -noreset -screen 800x600 :1
+```
+
+Per eseguire un'applicazione in `Xephyr`:
+
+```bash
+$ DISPLAY=:1 xterm
+```
 
 // =================================== Linux Embedded ====================================
 // =======================================================================================

@@ -52,18 +52,20 @@
   ),
 )
 
-#set text(font: "Fira Sans", weight: "light", size: 20pt)
+#set text(font: "Fira Sans", weight: "light", size: 18pt)
 #show math.equation: set text(font: "Fira Math")
 #set raw(tab-size: 4)
 #show raw.where(block: false): set text(size: 1.5em)
-#show raw: set text(size: 0.75em)
+#show raw: set text(size: 0.8em)
 #show raw.where(block: true): block.with(
   fill: luma(240),
   inset: (x: 1em, y: 1em),
   radius: 0.7em,
   width: 100%,
 )
+
 #let b(content) = text(weight: "bold", content)
+#set list(marker: text(1.5em, [•]))
 
 #let carbon-snippet(
   code,

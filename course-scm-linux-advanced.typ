@@ -1040,6 +1040,115 @@ Per eseguire un'applicazione in `Xephyr`:
 $ DISPLAY=:1 xterm
 ```
 
+== Configurazione di X
+
+Un server X gestisce *diversi dispositivi*: tastiere, mouse, monitor, schede video.
+
+Una configurazione del server X specifica come questi dispositivi sono #b[configurati] e #b[gestiti].
+
+Per semplici configurazioni con #b[mouse], #b[tastiera], #b[monitor] e #b[scheda video] non è necessario alcun file di configurazione: *X* si adatta #underline[automaticamente].
+
+Se abbiamo configurazioni più complesse come #b[multi-monitor] o #b[risoluzioni] personalizzate, occorre definire una #b[confiugrazione esplicita].
+
+Inoltre, molte distribuzioni forniscono *configurazioni predefinite* #underline[ragionevoli].
+
+== Dove si trovano i file di configurazione?
+
+Secondo la _man page_ di `Xorg` i file di configurazione possono essere trovati in *diversi* path:
+
+#table(
+  columns: (1fr, auto),
+  inset: 0.5em,
+  stroke: none,
+  table.header(
+    [#b[Path]], [#b[Scopo]]
+  ),
+  table.hline(stroke: 0.03em),
+  `/etc/X11/xorg.conf`, [Server configuration file.],
+  `/etc/X11/xorg.conf-4`, [Server configuration file.],
+  `/etc/xorg.conf`, [Server configuration file.],
+  `/usr/etc/xorg.conf`, [Server configuration file.],
+  `/usr/lib/X11/xorg.conf`, [Server configuration file.],
+  `/etc/X11/xorg.conf.d`, [Server configuration directory.],
+  `/etc/X11/xorg.conf.d-4`, [Server configuration directory.],
+  `/etc/xorg.conf.d`, [Server configuration directory.],
+  `/usr/etc/xorg.conf.d`, [Server configuration directory.],
+  `/usr/lib/X11/xorg.conf.d`, [Server configuration directory.],
+  table.hline(stroke: 0.03em),
+)
+
+#pagebreak()
+
+Dal momento che possono le configurazioni possono essere *passate in vari modi*,
+vengono lette in un ordine specifico:
+
+1. Viene data priorità al file passato con l'opzione `-config`
+2. Viene cercata la variabile d'ambiente `XORGCONFIG` (con nome del file di configurazione)
+3. Viene cercato nella cartella `/etc/X11/`
+  1. Primariamente `xorg.conf-4`
+  2. Secondariamente `xorg.conf`
+4. Viene cercato in `/etc` ma solo il file `xorg.conf`
+
+La #b[configurazione standard] si trova in `/etc/X11/xorg.conf`,
+oppure più file all'interno della cartella `/etc/X11/xorg.conf.d/`.
+
+== Il file di configurazione `xorg.conf`
+
+Il file di configurazione è suddiviso in 5 #b[sezioni] principali:
+
+/ `ServerLayout`: Definisce come lo schermo e i dispositivi di input sono organizzati per formare un display.
+/ `Screen`: Combina una scheda video e un `Monitor` per formare uno schermo.
+/ `Monitor`: Definisce le caratteristiche del monitor.
+/ `Device`: Definisce le caratteristiche della scheda video.
+/ `InputDevice`: Continene informazioni per un device di input. Solitamente ci sono due di queste sezioni, una per mouse e una per tastiera.
+
+== Esempio di file di configurazione `xorg.conf`
+
+```
+Section "ServerLayout"
+    Identifier     "Layout0"
+    Screen         0 "Screen0"
+    InputDevice    "Keyboard0" "CoreKeyboard"
+    InputDevice    "Mouse0" "CorePointer"
+EndSection
+
+Section "InputDevice"
+    Identifier     "Keyboard0"
+    Driver         "libinput"
+    Option         "XkbLayout" "it"  # Imposta la tastiera in italiano
+EndSection
+
+Section "InputDevice"
+    Identifier     "Mouse0"
+    Driver         "libinput"
+EndSection
+
+Section "Device"
+    Identifier     "Device0"
+    Driver         "nvidia"  # Cambia con "intel", "amd", "nouveau", ecc. in base alla tua scheda grafica
+    Option         "NoLogo" "True"  # Rimuove il logo NVIDIA all'avvio
+EndSection
+
+Section "Monitor"
+    Identifier     "Monitor0"
+    VendorName     "Generic"
+    ModelName      "Generic Monitor"
+    HorizSync      30.0 - 80.0
+    VertRefresh    50.0 - 75.0
+EndSection
+
+Section "Screen"
+    Identifier     "Screen0"
+    Device         "Device0"
+    Monitor        "Monitor0"
+    DefaultDepth   24
+    SubSection "Display"
+        Depth       24
+        Modes      "1920x1080"  # Risoluzione preferita
+    EndSubSection
+EndSection
+```
+
 // =================================== Linux Embedded ====================================
 // =======================================================================================
 

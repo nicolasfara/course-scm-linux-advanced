@@ -1325,6 +1325,85 @@ In generale #b[X] è un *componente di mezzo* tra le applicazioni e il composito
   #figure(image("images/wayland-architecture.png"))
 ]
 
+== Vantaggi di Wayland
+
+- *Sicurezza*: Wayland è progettato per essere più sicuro di X. I client non possono accedere a memoria di altri client.
+- *Efficienza*: Wayland è progettato per essere più efficiente di X. Il compositor sa esattamente cosa deve essere renderizzato.
+- *Semplicità*: Wayland è progettato per essere più semplice di X. Il protocollo è più semplice e più facile da implementare.
+- *Modernità*: Wayland è progettato per essere più moderno di X. Supporta le tecnologie moderne come le composizioni.
+- *Compatibilità*: Wayland è progettato per essere compatibile con X. È possibile eseguire applicazioni X su Wayland tramite XWayland.
+- *High DPI*: Wayland è progettato per supportare meglio gli schermi ad alta risoluzione.
+
+== XWayland
+
+XWayland è un server X che gira sopra Wayland e permette di *eseguire applicazioni X* su un compositor Wayland.
+
+=== Note su XWayland
+
+- *Sicurezza*: XWayland è di fatto un server X. Non applica quindi le stesse restrizioni di sicurezza di Wayland.
+- *Prestazioni*: XWayland ha performance pressoché identiche a X. Qualche degradazione è possibile, soprattutto su schede video #b[NVIDIA].
+- *Compatibilità*: XWayland non è *pienamente compatibile* con X11. Alcune applicazioni potrebbero non funzionare correttamente su XWayland.
+
+== Toolkit e Wayland
+
+I toolkit grafici come #b[GTK] e #b[Qt] sono stati aggiornati per supportare Wayland.
+
+- *GTK*: supporta Wayland dalla versione 3.20.
+- *Qt*: supporta Wayland dalla versione 5.4.
+
+La maggior parte delle #b[applicazioni moderne] supporta Wayland, ma alcune applicazioni più vecchie potrebbero non funzionare correttamente.
+
+== QT e GTK su Wayland
+
+=== GTK
+GTK utilizza Wayland *di default* se disponibile. Per forzare l'uso di X11, è possibile settare la variabile d'ambiente `GDK_BACKEND=x11`.
+
+=== QT
+Per abilitare il supporto a #b[wayland] in QT, è necessario installare il pacchetto `qtwayland5` o `qt5-wayland` (il nome dipende dalla distribuzione).
+Le applicazioni QT *supporteranno Wayland* se il compositor è Wayland.
+
+Generalmente non è necessario, ma è possibile forzare l'ude di Wayland usando `-platform wayland` oppure `QT_QPA_PLATFORM=wayland`.
+
+Per forzare invece l'uso di X11 in una sessione Wayland, è possibile settare `QT_QPA_PLATFORM=xcb`.
+
+== Configurazione Electron per Wayland
+
+Se si utilizza una applicazione basata su #b[Electron] su un sistema Wayland, è possibile che l'applicazione non si comporti correttamente.
+
+Per forzare l'uso di XWayland, è possibile adottare la seguente configurazione:
+
+File `~/.config/electron-flags.conf`:
+```
+--enable-features=WaylandWindowDecorations
+--ozone-platform-hint=auto
+```
+
+Per vecchie versioni di electron \<25 :
+
+```
+--enable-features=UseOzonePlatform
+--ozone-platform=wayland
+```
+
+== Distingure finestra X e Wayland
+
+Per capire se si sta utilizzando X o Wayland, è possibile usare il comando `echo $XDG_SESSION_TYPE`.
+
+Tuttavia, visto che XWayland potrebbe essere attivo, potrebbe non essere chiaro *quale* applicazione 
+sta utilizzando #b[X] o #b[Wayland].
+
+=== xeyes
+
+Per capire quale server grafico sta utilizzando un'applicazione, è possibile usare `xeyes`.
+
+Se `xeyes` si muove con il mouse, allora l'applicazione sta utilizzando X. Se invece `xeyes` non si muove con il mouse, allora l'applicazione sta utilizzando Wayland.
+
+=== extramaus
+
+Un altro metodo per capire quale server grafico sta utilizzando un'applicazione è utilizzare `extramaus`.
+
+Se il mouse diventa #text(fill: red)[rosso] allora si tratta di una applicazione #b[X], altrimenti si tratta di una applicazione #b[Wayland].
+
 // =================================== Linux Embedded ====================================
 // =======================================================================================
 

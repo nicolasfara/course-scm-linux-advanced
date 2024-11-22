@@ -1149,6 +1149,104 @@ Section "Screen"
 EndSection
 ```
 
+== Configurazione: `ServerLayout`
+
+Sezione del file di configurazione *opzionale* ma quasi sempre presente nel file di configurazione.
+
+Le sotto-sezioni di `ServerLayout` includono:
+
+/ `Identifier`: Nome univoco per il layout.
+/ `Screen`: Associa uno schermo con il display. Se si vogliono associare più screen, si possono aggiungere più righe `Screen`.
+/ `InputDevice`: Associa un dispositivo di input con il layout.
+/ `Option`: Opzioni per il layout.
+
+== Configurazione: `Screen`
+
+La sezione `Screen` combina un `Device` e un `Monitor` per formare uno schermo.
+
+Le sotto-sezioni di `Screen` includono:
+
+/ `Identifier`: Nome univoco per lo screen. Utilizzabile anche da CLI con l'opzione `-screen`.
+/ `Device`: Cross-reference alla scheda video deefinita nella blocco `Device`.
+/ `Monitor`: Cross-reference al monitor definito nella sezione `Monitor`.
+/ `DefaultDepth`: Profondità di colore predefinita per lo screen in bits/pixel, 24 è la più comune.
+
+== Configurazione: `Monitor`
+
+La sezione `Monitor` definisce le caratteristiche del monitor e solitamente è molto semplice in quanto contiene solo una entry `Identifier`.
+
+== Configurazione: `Device`
+
+La sezione `Device` definisce le caratteristiche della scheda video.
+
+Le sotto-sezioni di `Device` includono:
+
+/ `Identifier`: Nome univoco per la scheda video.
+/ `Driver`: Driver da utilizzare per la scheda video. Generalmente identificato automaticamente tramite PCI.
+
+== Configurazione: `InputDevice`
+
+La sezione `InputDevice` definisce le dispositivi di input come tastiere e mouse.
+
+Le sotto-sezioni di `InputDevice` includono:
+
+/ `Identifier`: Nome univoco per il dispositivo di input.
+/ `Driver`: Driver da utilizzare per il dispositivo di input. \
+    Ad esempio `libinput` o `synaptics` (touchpad).
+
+== Server X Remoto
+
+Un server X può essere eseguito su un *computer remoto* e visualizzato su un *computer locale*.
+
+Per fare ciò, è necessario #b[abilitare il forwarding X] sul server remoto e #b[configurare il client locale] per connettersi al server remoto.
+
+Prerequisiti:
+- #b[Server remoto] con Xorg installato
+- #b[Client locale] con *SSH* installato (`ssh` su Linux e macOS, `PuTTY` su Windows)
+- #b[X11 forwarding] abilitato sul server remoto (configurazione di `sshd_config`)
+
+== Abilitare X11 Forwarding
+
+Per abilitare il #b[forwarding X11] su un server remoto, è necessario modificare il *file di configurazione di SSH*.
+
+Il file di configurazione di SSH si trova in `/etc/ssh/sshd_config` e la direttiva da modificare è `X11Forwarding`.
+
+```bash
+X11Forwarding yes
+# X11DisplayOffset 10
+# X11UseLocalhost yes
+```
+
+== Connessione al Server Remoto
+
+Per connettersi al server remoto con il forwarding X11 abilitato, è necessario usare l'opzione `-X` di `ssh`.
+
+```bash
+$ ssh -X user@remote-server
+```
+
+Una volta connessi, è possibile avviare applicazioni grafiche sul server remoto e visualizzarle sul
+client locale.
+
+```bash
+$ xeyes
+```
+
+Per comprimere i dati X11 trasmessi, si può usare l'opzione `-C`:
+
+```bash
+$ ssh -XC user@remote-server
+```
+
+== Limitazioni del Forwarding X11
+
+Il forwarding X11 è un metodo semplice per visualizzare applicazioni grafiche da un server remoto,
+ma ha alcune #b[limitazioni]:
+
+- #fa-warning() *Sicurezza* #fa-warning(): il forwarding X11 non è sicuro, poiché i dati X11 non sono crittografati
+- *Velocità*: il forwarding X11 può essere lento su connessioni lente
+- *Compatibilità*: alcune applicazioni grafiche non supportano il forwarding X11
+
 // =================================== Linux Embedded ====================================
 // =======================================================================================
 

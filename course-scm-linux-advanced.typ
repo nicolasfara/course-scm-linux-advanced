@@ -1247,6 +1247,84 @@ ma ha alcune #b[limitazioni]:
 - *Velocità*: il forwarding X11 può essere lento su connessioni lente
 - *Compatibilità*: alcune applicazioni grafiche non supportano il forwarding X11
 
+== Server Grafici: Wayland
+
+#slide[
+  *Wayland* è la #b[next-generation display server] per sistemi _Unix-like_ progettato per sostituire il sistema X Window.
+
+  Wayland è stato progettato per essere più #b[moderno], #b[efficiente] e #b[sicuro] rispetto a X.
+][
+  #figure(image("images/Wayland_Logo.svg"))
+]
+
+== Design High-Level di Wayland
+
+Ogni computer ha dispositivi di #b[input] e #b[output] che vengono condivise tra le applicazioni.
+
+Il ruolo del *Compositor di Wayland* è quello di distribuire gli eventi di input agli appropriati *client Wayland* e di visualizzarle correttamente in output.
+
+Il processo di "raccogliere" tutte le finestre e delle applicazioni e renderle sullo schermo è chiamato #b[compositing]. Il *compositor* è responsabile di questo processo.
+
+Il #b[server] wayland è il *compositor*, mentre le applicazioni sono i #b[client wayland].
+
+== Un protocollo non un'implementazione
+
+Wayland definisce un *protocollo* che viene usato dalle applicazioni per rendersi visibili sullo schermo 
+e prendere input dall'utente. Spesso ci si rifereisce a *Wayland* come architettura.
+
+Non esiste un singolo server Wayland come #b[Xorg] lo è per #b[X11],
+ma ogni environment grafico fornisce la propria implementazione del compositor *Wayland*.
+
+Una parte core dell'architettura Wayland è `libwayland`, una libreria C che implementa una _inter-process communication_ (IPC) che traduce la definizione del protocollo in #b[XML] ad #b[API C].
+
+Questa non è una implementazione di Wayland, ma #b[codifica] e #b[decodifica] i messaggi del protocollo.
+
+== Architettura di Wayland comparata con X
+
+#slide(composer: (1fr, auto))[
+  #only("1")[
+    Per comprendere l'architettura di *Wayland* è utile confrontarla con quella di #b[X].
+
+    1. Il kernel prende eventi dai dispositivi di input e li passa al server #b[traducendo] i singoli protocolli in un formato standard (`evdev`).
+    2. Il server #[X] determina quale finestra è coinvolta dall'evento e lo passa al client. Il server #b[X] non sa l'effettiva posizione delle finestre in quanto gestito dal #b[compositor].
+    3. Il client gestisce l'evento e decide come reagire.
+  ]
+  #only("2")[
+    4. Quando il server #b[X] riceve la richiesta di *rerendering* calcolando le nuove bounding region delle finestre e lo comunica al #b[compositor] (_damage event_).
+    5. Il compositor riorganizza parte dello schermo dove la finestra è visibile. È anche responsabile di #b[renderizzare] l'intero schermo passando dal server #b[X] per il rendereing.
+    6. Il server #b[X] riceve la richiesta di rerendering e #b[copia] il buffer del compositor per essere renderizzato.
+  ]
+  
+][
+  #align(center)[Architettura di #b[X]]
+  #figure(image("images/x-architecture.png"))
+]
+
+== Problemi di questo approccio
+
+- Il server #b[X] non ha *sufficienti informazioni* per decidere quale finestra deve ricevere l'evento.
+- Non riesce a convertire le coordinate dello schermo in coordinate della finestra locali.
+- Anche se #b[X] ha lasciato la responsabilità del rendering al #b[compositor], il server #b[X] deve comunque #b[gestire] il rendering.
+- Molte parti *complesse* per la gestione di #b[X] ora sono disponibili nel kernel o in librerie.
+
+In generale #b[X] è un *componente di mezzo* tra le applicazioni e il compositor, ma anche tra l'hardware e il compositor.
+
+== Architettura di Wayland
+
+#slide(composer: (1fr, auto))[
+
+  In Wayland il *compositor* è il #b[display server].
+
+  1. Il kernel recupera gli #b[eventi] e li invia al *compositor* (simile a #b[X])
+  2. Il compositor determina se ci sono fisetre che devono ricevere l'evento e lo invia al #b[client].
+      Essendo lo _sceenegraph_ conosciuto, il compositor sa esattamente quale finestra è coinvolta.
+  3. Come per #b[X] il client gestisce l'evento e decide come reagire. Ma in Wayland il client è responsabile di #b[renderizzare] la finestra e notificare il compositor della regione che è cambiata.
+  4. Il compositor riceve le notifica di cambiamento e #b[renderizza] la regione interessata.
+][
+  #align(center)[Architettura di #b[Wayland]]
+  #figure(image("images/wayland-architecture.png"))
+]
+
 // =================================== Linux Embedded ====================================
 // =======================================================================================
 

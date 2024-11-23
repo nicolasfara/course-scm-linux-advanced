@@ -43,11 +43,11 @@
     preamble: pdfpc-config, 
   ),
   config-info(
-    title: [Title],
-    subtitle: [Subtitle],
-    author: [Authors],
+    title: [Corso Linux Avanzato],
+    // subtitle: [Subtitle],
+    author: [Nicolas Farabegoli],
     date: datetime.today(),
-    institution: [Institution],
+    institution: [SCM Campus],
     // logo: emoji.school,
   ),
 )
@@ -204,7 +204,7 @@
 
 // ============================ Packages and Package Managers ============================
 // =======================================================================================
-= Package Manager su distro Linux
+= Distro Linux Package Managers
 
 == Installazione software su Linux
 
@@ -1407,7 +1407,95 @@ Se il mouse diventa #text(fill: red)[rosso] allora si tratta di una applicazione
 // =================================== Linux Embedded ====================================
 // =======================================================================================
 
-= Linux Embedded (Yocto Project)
+= Linux Embedded --- #b[Yocto Project]
+
+== Cos'è il progetto Yocto?
+
+#slide(composer: (2fr, 1fr))[
+  Il #b[progetto Yocto] è una iniziativa #underline[open source] per facilitare la realizzazione di sistemi _Linux-based_ specfici per sistemi embedded *indipendentemente* dall'architettura hardware.
+
+  Fornisce un insieme di #b[strumenti] e #b[ambienti di sviluppo] per la creazione di sistemi embedded sfruttando *best practices* e *standard*.
+][
+  #figure(image("images/Yocto_Project_logo.svg"))
+]
+
+== Yocto overview
+
+#figure(image("images/yocto-official-overview.png"))
+
+== Feature di Yocto
+
+- *Ampiamente adottata nell'industria*: molti vendor noti forniscono #b[supporto] per Yocto
+- *Agnostica dall'architettura*: Yocto supporta #b[Intel], #b[ARM], #b[MIPS], #b[AMD], #b[PPC] e altre architetture
+- *Flessibilità*: Possibilità di creare distribuzioni Linux #b[custom] mediante _configurazioni_ e _layer_
+- *Ideale per sistemi embedded e dispositivi IoT*: Possibilità di #b[ottimizzare] l'immagine per risorse hardware limitate
+- *Modello a Layer*: consente di #b[isolare] funzionalità riducendo la complessità e la ridondanza
+
+== #fa-warning() Sfide di Yocto
+
+- *Curva di apprendimento*: Yocto ha una curva di apprendimento #b[ripida]. Molti task possono essere fatti in modi diversi: difficile trovare il modo migliore.
+- *Workflow intricato*: A differenza dello sviluppo su PC, che solitamente prevede binari pre-compilati, Yocto richiede la #b[compilazione da sorgenti] e la #b[configurazione manuale].
+- *Ambiente cross-compilato*: Yocto richiede le toolchain #b[cross-compilate] per la compilazione su architetture diverse. Questo può essere complicato quando si sviluppa per una specifica architettura.
+- #fa-clock() *Tempi di compilazione*: Tempi di compilazione lunghi, specialmente per la prima build sono inevitabili dal memento che ogni pacchetto è #b[compilato dai sorgenti].
+
+== Modello a Layer di Yocto
+
+Il #b[modello a layer] di *Yocto* è un modello di sviluppo che lo distingue da altri sistemi di build.
+
+Questo modello supporta contemporaneamente la #b[collaborazione] e la #b[personalizzazione].
+
+I *layer* sono #b[repository] che contengono un #b[set di istruzioni] per indicare a *OpenEmbedded* cosa fare.
+
+Un *layer* può contenere cambiamenti per #b[precedenti istruzioni] o #b[override di impostazioni]. Questo permette di #b[personalizzare] layer preesistenti per adattare la build alle proprie esigenze.
+
+#pagebreak()
+
+Si usano i *layer* per #b[organizzare] e #b[separare logicamente] le informazioni nella build.
+
+Ad esempio, possiamo dover gestire *GUI*, *configurazioni di sistema*, *applicazioni*, ecc. e metterli in un unico layer #b[limita] e #b[complica] la gestione futura e il riuso.
+
+Inizialmente si tende a voler mettere #b[tutte le funzionalità] in un unico layer,
+ma più modulari sono i *Metadata* più facile sarà #b[gestire] e #b[estendere] il sistema in futuro.
+
+=== Note sull'adozione dei layer
+
+- Utilizzare i #b[Board Package Support] (BSP) forniti dai produttori hardware
+- Familiarizzare con #underline[#link("https://www.yoctoproject.org/software-overview/layers/", "Yocto Project Compatible Layers")] e #underline[#link("https://layers.openembedded.org/", "OpenEmbedded Layer Index")]
+- Prediligere layer segnalati con #b[YP Compatible]
+
+#align(center)[#text(size: 1.3em)[Tipicamente i *layer* hanno un nome che inizia con `meta-`]]
+
+== Componenti e Strumenti
+
+*Yocto* mette a disposizione una serie di #b[componenti] e #b[strumenti] per la creazione di distro personalizzate.
+Di seguito una panoramica dei principali componenti:
+
+=== Strumenti di sviluppo
+
+- *CROPS*: fornisce un ambiente di sviluppo cross-plaform sfruttando #b[Docker]
+- *devtool*: strumento a linea di comando parte dell'#b[extensible SDK] (eSDK). Aiuta a creare, testare e distribuire pacchetti software dentro eSDK.
+- *eSDK*: fornisce un ambiente di sviluppo cross-compilato per creare applicazioni per il sistema target.
+- *Toaster*: interfaccia web per la gestione delle build Yocto.
+- *Estensione VScode*: estensione per #b[Visual Studio Code] per lo sviluppo delle ricette Yocto.
+
+#pagebreak()
+
+=== Strumenti per la produzione
+
+- *Auto Upgrade Helper*: gestisce l'aggiornamento delle ricette che sono basate su nuove versioni pubblicate in upstream.
+- *Recipe Reporting System*: traccia le versioni disponibili per Yocto.
+- *AutoBuilder*: AutoBuilder è un progetto che automatizza la compilazione, il test e la quality assurance (QA).
+
+=== Open-Embedded Build System Components
+
+- *BitBake*: il cuore del sistema di build Yocto. BitBake è un task scheduler che legge file testuali per capire cosa deve essere fatto e dove.
+- *OpenEmbedded-Core*: insieme di ricette e classi di base per la creazione di distribuzioni Linux.
+
+== Distribuzione di Riferimento #b[Poky]
+
+È la distribuzione di *riferimento* del progetto Yocto. Contiene #b[OpenEmbedded Build System] (BitBake e OpenEmbedded-Core) e diversi metadati per la creazione di distribuzioni Linux personalizzate.
+
+#figure(image("images/yocto-official-overview.png"))
 
 == Architettura sistema Linux (semplificata)
 

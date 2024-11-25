@@ -1617,6 +1617,38 @@ Questa lista si trova in `meta/files/common-licenses`. Al termine della build, t
 Se un modulo richiede una licenza che non è parte di questa lista, il processo di build solleva in #b[warning].
 Questo approccio aiuta gli sviluppatori a garantire che i pacchetti siano conformi alle licenze.
 
+== Bitbake
+
+== Recipes
+
+== Classes
+
+== Configurations
+
+== layers
+
+== Users Configuration
+
+== Distro Layer
+
+== BSP layer
+
+== Software Layer
+
+== Sources
+
+== Bitbake: fetch risorse
+
+== Bitbake: patching
+
+== Bitbake: configurazione, compilazione e staging
+
+== Bitbake: package splitting
+
+== Bitbake: generazione immagine
+
+== Immagini
+
 // OLD
 
 == Architettura sistema Linux (semplificata)

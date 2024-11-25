@@ -1497,6 +1497,128 @@ Di seguito una panoramica dei principali componenti:
 
 #figure(image("images/yocto-official-overview.png"))
 
+== Terminologia
+
+/ Configuration File: file contenente le definizioni di #b[variabili] globali, definite dall'utente e infromazioni sulle #b[configurazioni hardware].
+/ Recipe: forma più comune di #b[metadata]. Contiene una lista di #b[configurazioni] e #b[task] per la compilazione di un componente software.
+  Una #b[ricetta] descrive come recuperare e compilare un componente software e quali eventuali #b[patch] applicare.
+  Descrivono anche #b[dipendenze] per librerie o altre ricette.
+  Sono memorizzate nei #b[layer].
+/ Layer: insieme di #b[ricette]. Un layer consente di organizzare ricette correlate tra loro per personalizzare la build.
+  I layer sono #b[gerarchici] in quanto è possibile fare _override_ di ricette in layer successivi.
+/ Metadata: includono #b[ricette], #b[file di configurazioni], e #b[altre informazioni] necessarie per controllare quali cose verrano incluse nella build e come verranno costruite.
+/ OpenEmbedded-Core: metadata contenente le #b[ricette] e le #b[classi] di base per la creazione di distribuzioni Linux. Ricette curate dalla comunità OpenEmbedded.
+/ Poky: distribuzione di #b[riferimento] per sistemi embedded e riferimento per configurazioni di test per:
+  (i) fornire funzionalità base per una distro funzionante, e (ii) testare componenti Yocto.
+/ Build System -- "Bitbake": #b[scheduler] e #b[execution engine] che parse le istruzioni (ricette) e dati di configurazione.
+  Crea un #b[dependency tree] per definire l'ordine e fare scheduling dei task di compilazione e costruire la distribuzione specificata.
+  Strumento simila a #b[make].
+/ Packages: output del processo di #b[build] per creare l'immagine finale.
+/ Extensible Software Development Kit (eSDK): SDK custom per sviluppatori che vogliono #b[incoprorare] le proprie librerie nell'immagine per rendere il proprio codice disponibile ad altre applicazioni o sviluppatori.
+/ Image: fomato binario di una #b[distribuzione] (sistema operativo) che può essere installato su un dispositivo target.
+
+== Workflow di Yocto
+
+1. Viene specificata una #b[architettura], #b[policies], #b[patches] e #b[configurazioni].
+2. Il #b[build system] recupera e scarica i sorgenti. Diversi formati e modi di recuperare i sorgenti sono supportati.
+3. Una volta scaricati, vengono estratti all'interno di una #b[cartella locale] dove vengono applicate eventuali #b[patch] e gli step per configurare e compilare il software vengono eseguiti.
+4. Il software viene quindi installato una #b[staging area temporanea] dove viene usato il #b[formato di pacchetto selezionato] (`deb`, `rpm`, o `ipk`) verrà usato per installare il software.
+5. Diversi controlli #b[QA] vengono eseguiti durante l'intero processo di build.
+6. Viene creata l'immagine del #b[file system] finale.
+
+== Yocto Project Development Environment
+
+=== Filosofia Open Source
+
+Il progetto *Yocto* è un progetto #b[open source] e #b[comunitario].
+Differentemente da progetti #b[closed source], Yocto permette a #b[sviluppatori] e #b[aziende] di contribuire e migliorare il progetto.
+
+In ambienti open source i #b[prodotti finali], #b[sorgenti], #b[documentazione] sono disponibili *pubblicamente* senza costi.
+
+== Development Host
+
+Il development host o *Build Host* è fondamentale per utilizzare Yocto.
+
+L'obiettivo di #b[Yocto] è quello di sviluppare immagini per #b[sistemi embedded] e quindi lo sviluppo di quelle immagini e applicazioni avviene su un host non pensato per eseguirle: il *development host*.
+
+Come #b[Build Host] non è necessario avere una macchina Linux, ma è sufficiente avere un sistema che sia in grado di eseguirlo, come ad Docker.
+
+Per configurare un Build Host è possibile utilizzare #b[CROPS] (CROss PlatformS) tramite Docker. Questo mette a disposizione una shell interattiva con tutti gli strumenti necessari per lo sviluppo.
+
+#align(center)[#text(size: 1.3em)[Faremo riferimento a *CROPS* per configurare il Build Host.]]
+
+== Yocto Project Source Repositories
+
+Il team di *Yocto* mantiene una lista completa di #b[repository] per tutti i componenti del progetto all'indirizzo #underline[#link("https://git.yoctoproject.org/", "git.yoctoproject.org")].
+
+Il sito organizza i repository in #b[categorie] per funzioni come _Plugin per IDE_, _Matchbox_, _Poky_, _Yocto Linux Kernel_ e altri.
+
+È possibile interagire con i repository, ad esempio clonarli, tramite #b[Git] per avere una copia locale dei sorgenti.
+
+== Interazione Tramite Repository con Git
+
+Il modo *caldamente consigliato* per integrare i #b[repository] di Yocto nella distribuzione è tramite #b[Git].
+
+- Questo consente di #b[seguire] le modifiche e #b[aggiornamenti] dei repository.
+- È possibile #b[contribuire] al progetto Yocto.
+
+Prestare attenzione ad utilizzare lo stesso #b[branch] per tutti i repository per evitare problemi di #b[compatibilità].
+
+Ad esempio se si utilizza il branch `scarthgap` per `poky`, utilizzare lo stesso branch per `meta-openembedded`, `meta-intel`, ecc.
+
+== Progetto Yocto e Git
+
+#slide(composer: (1fr, auto))[
+  Sviluppare con *Yocto* richiede una discreta conoscenza di #b[Git].
+
+  #b[Git] è un sistema di controllo di versione distribuito che permette di tenere traccia delle modifiche ai file e coordinare il lavoro tra più persone.
+
+  - *Yocto* organizza e mantiene i file in #b[branch] tramite i quali #b[Git] traccia le modifiche.
+  - Generalmente ogni #b[branch] corrisponde a una #b[release] di Yocto.
+  - I #b[tag] sono usati per marcare #b[release] e #b[versioni] specifiche.
+
+  ```git
+  $ cd ~
+  $ git clone git://git.yoctoproject.org/poky
+  $ cd poky
+  $ git fetch --tags
+  $ git checkout tags/rocko-18.0.0 -b my_rocko-18.0.0
+  ```
+][
+  #figure(image("images/Git_icon.svg"))
+]
+
+== Prontuario Git
+
+- `git init`: inizializza un repository
+- `git clone <url>`: clona un repository
+- `git add <file>`: aggiunge un file al repository
+- `git commit -m "message"`: committa le modifiche
+- `git status`: mostra lo stato del repository
+- `git checkout branch`: cambia branch
+- `git checkout -b <branch>`: crea e fa checkout su un nuovo branch
+- `git branch -a`: mostra tutti i branch locali e remoti
+- `git pull`: scarica le modifiche dal repository remoto
+- `git push`: carica le modifiche sul repository remoto
+- `git log`: mostra la cronologia delle modifiche
+- `git diff`: mostra le modifiche non committate
+
+== Licenze
+
+Il progetto *Yocto* è rilasciato sotto la #b[licenza MIT].
+
+Questa licenza permette il riuso di software all'interno di progetti open source e #b[commerciali].
+Più informazioni sulla licenza sono disponibili: #underline[#link("https://spdx.org/licenses/MIT.html", "MIT License")].
+
+Quando si costruisce un'immagine, il processo di build usa una lista di #b[licenze note] per verificare che i pacchetti siano conformi alle licenze.
+
+Questa lista si trova in `meta/files/common-licenses`. Al termine della build, tutte le licenze trovate e usate durante la build sono salvate in `tmp/deploy/licenses`.
+
+Se un modulo richiede una licenza che non è parte di questa lista, il processo di build solleva in #b[warning].
+Questo approccio aiuta gli sviluppatori a garantire che i pacchetti siano conformi alle licenze.
+
+// OLD
+
 == Architettura sistema Linux (semplificata)
 
 #figure(image("images/linux-architecture.png"))

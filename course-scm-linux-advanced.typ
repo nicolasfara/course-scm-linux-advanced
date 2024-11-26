@@ -2035,188 +2035,376 @@ PN = "${@bb.parse.vars_from_file(d.getVar('FILE', False),d)[0] or 'defaultpkgnam
 PV = "${@bb.parse.vars_from_file(d.getVar('FILE', False),d)[1] or '1.0'}"
 ```
 
-== Users Configuration
+== Condivisione funzionalità
 
-== Distro Layer
+BitBake usa la variabile `BBPATH` per trovare i file di #b[configurazione] e i file delle #b[classi].
 
-== BSP layer
+Per far sì che `include` e `class` file siano individuabili da BitBake, devono essere inclusi in una cartella "classes"
+a sua volta definita in `BBPATH`.
 
-== Software Layer
+== Direttiva `inherit`
 
-== Sources
+Quando si sviluppa una #b[ricetta] o una #b[classe] si può fare uso della direttiva `inherit` per ereditare funzionalità da altre classi (`.bbclass`).
 
-== Bitbake: fetch risorse
+Ad esempio se una ricetta richiede l'uso di `autotools` per la compilazione, si può fare uso della classe `autotools.bbclass`:
 
-== Bitbake: patching
+```bash
+inherit autotools
+```
 
-== Bitbake: configurazione, compilazione e staging
+In questo caso BitBake cerca la directory `classes/autotools.bbclass` in `BBPATH` e la include.
 
-== Bitbake: package splitting
+È possibile ereditare più classi:
 
-== Bitbake: generazione immagine
+```bash
+inherit autotools pkgconfig
+```
 
-== Immagini
+== Direttiva `include`
+
+Questa direttiva permette di inserire un file specificato #b[all'interno] del file corrente.
+
+Questa direttiva è più generica di `inherit` in quanto è applicabile a qualsiasi file, non solo a classi.
+
+```bash 
+include test_defs.inc
+```
+
+#fa-warning() *Attenzione*: se il file non viene trovato, BitBake #b[non] solleva un errore. Se il file è richiesto, meglio usare `require`.
+
+== Direttiva `require`
+
+Questa direttiva è simile a `include` ma solleva un errore se il file non viene trovato.
+
+```bash
+require foo.inc
+```
+
+Questa direttiva è utile quando si hanno #b[versioni multiple] di una ricetta e si vuole raccogliere gli elementi comuni in un #b[file separato].
+
+Ogni ricetta può includere il file comune con `require`.
+
+== Funzioni
+
+Come in molti linguaggi le *funzioni* sono i blocchi fondamentali che permettono di #b[organizzare] il codice.
+
+BitBake supporta i seguenti tipi di funzioni:
+
+- #b[Shell Functions]: funzioni scritte in _shell script_ ed eseguite direttamente come *funzioni*, *task*, o *entrambi*.
+- #b[BitBake-Style Python Functions]: funzioni scritte in _Python_ ed eseguite da BitBake o altre funzioni Python usando `bb.build.exec_func()`.
+- #b[Python Functions]: funzioni scritte in _Python_ ed eseguite da Python.
+- #b[Anonymous Python Functions]: funzioni scritte in _Python_ ed eseguite automaticamente durante il parsing.
+
+== Shell Functions
+
+Le *funzioni shell* sono scritte in _shell script_ e possono essere eseguite direttamente come *funzioni*, *task*, o *entrambi*.
+
+```bash
+some_function () {
+    echo "Hello World"
+}
+```
+
+Queste funzioni sono eseguite via `/bin/sh` e quindi non posso fare uso di funzionalità avanzate di #b[Bash].
+
+#b[Overrides] e #b[operatori di override] come `:append` e `:prepend` possono essere usati con funzioni shell.
+
+```bash
+do_foo() {
+    bbplain first
+    fn
+}
+
+fn:prepend() {
+    bbplain second
+}
+
+fn() {
+    bbplain third
+}
+
+do_foo:append() {
+    bbplain fourth
+}
+```
+
+== Python functions
+
+Le *funzioni Python* sono scritte in _Python_ e possono essere eseguite da BitBake o altre funzioni Python usando `bb.build.exec_func()`.
+
+```python
+python some_python_function () {
+    d.setVar("TEXT", "Hello World")
+    print d.getVar("TEXT")
+}
+
+python do_foo() {
+    bb.plain("second")
+}
+
+python do_foo:append() {
+    bb.plain("third")
+}
+```
+
+Siccome `bb` e `os` sono importate, non è necessario importarle esplicitamente.
+
+In queste funzioni la variabile `d` è una #b[variabile globale] ed è sempre disponibile.
+
+== Python Functions
+
+Queste funzioni sono scritte in _Python_ e sono eseguite da altro codice python.
+
+Un esempio di funzioni _Python_ sono funzioni di utilità che sono pensate per essere chiamate in modo #b[inline] da altre funzioni _Python_.
+
+```python
+def get_depends(d):
+    if d.getVar('SOMECONDITION'):
+        return "dependencywithcond"
+    else:
+        return "dependency"
+
+SOMECONDITION = "1"
+DEPENDS = "${@get_depends(d)}"
+```
+
+In questo tipo di funzioni la variabile `d` #b[non] è disponibile in automatico.
+
+== Anonymous Python Functions
+
+Le *funzioni Python anonime* sono scritte in _Python_ e sono eseguite automaticamente durante il parsing.
+
+```python
+python () {
+    d.setVar("TEXT", "Hello World")
+    print d.getVar("TEXT")
+}
+```
+
+Queste funzioni sono eseguite #b[automaticamente] durante il parsing e non possono essere chiamate esplicitamente.
+
+== Tasks
+
+I *task* sono unità di esecuzione che definisco gli #b[step] che BitBake può eseguire per una data ricetta.
+
+I *task* sono supportati solo su #b[classi] e #b[ricette] (file `.bb`).
+
+Per #b[convenzione], i task sono definiti con il prefisso `do_`.
+
+=== Task `do_build`
+
+Task di *default* per tutte le #b[ricette]. Questo task dipende da tutti gli altri task richiesti per compilare una ricetta.
+
+=== Task `do_compile`
+
+Questo task *compila* il codice sorgente. Questo task viene eseguito nella #b[cartella corrente di lavoro] settata a `${B}`.
+
+Di default, questo task esegue la funzione `oe_runmake` se un `Makefile`, `makefile` o `GNUmakefile` è presente;
+altrimenti non esegue nulla.
+
+=== Task `do_fetch`
+
+Questo task *recupera* il codice sorgente. Questo task usa la variabile `SRC_URI` per recuperare il codice sorgente e l'argument prefix per determinare il modo di recuperare il codice.
+
+=== Task `do_install`
+
+Questo task *copia* i file che devono essere impacchettati nel #b[holding area] `${D}`.
+Questo task esegue nella cartella corrente di lavoro `${B}`.
+
+=== Task `do_patch`
+
+Questo task *applica* le patch al codice sorgente. Questo task esegue nella cartella corrente di lavoro `${B}`.
+
+== Features
+
+Le *features* forniscono un meccanismo per lavorare con #b[pacchetti] che devono essere inclusi nell'immagine finale.
+
+Le #b[distribuzioni] selezionano quali *features* vogliono supportare attraverso la variabile #underline[#link("https://docs.yoctoproject.org/ref-manual/features.html#distro-features", `DISTRO_FEATURES`)].
+
+Features relative all'hardware sono selezionate attraverso la variabile #underline[#link("https://docs.yoctoproject.org/ref-manual/features.html#machine-features", `MACHINE_FEATURES`)].
+
+Queste due variabili #b[controllano] quali *moduli del kernel*, *utilities* e *pacchetti* includere.
+
+Una data #b[distribuzione] può supportare un cert subset di feature così che alcune feature di #b[macchine] (machine) non verranno incluse se non supportate dalla distribuzione.
+
+La variabile #underline[#link("https://docs.yoctoproject.org/ref-manual/features.html#image-features", `IMAGE_FEATURES`)] controlla quali *features* includere nell'immagine finale.
+
+== Variabili comuni
+
+Le variabili comuni sono variabili che sono #b[comuni] a tutte le ricette e classi.
+
+Alcune variabili comuni sono:
+
+- `PN` (Package Name): il nome del pacchetto
+- `PV` (Package Version): la versione del pacchetto
+- `PR` (Package Revision): la revisione del pacchetto
+- `S` (Source): la directory sorgente
+- `B` (Build): la directory di build
+- `D` (Destination): la directory di destinazione
+- `WORKDIR`: la directory di lavoro
+
+La lista completa delle variabili comuni è disponibile nella #underline[#link("https://docs.yoctoproject.org/ref-manual/variables.html", "documentazione ufficiale")].
 
 // OLD
 
-== Architettura sistema Linux (semplificata)
+// == Architettura sistema Linux (semplificata)
 
-#figure(image("images/linux-architecture.png"))
+// #figure(image("images/linux-architecture.png"))
 
-== Linux Embedded
+// == Linux Embedded
 
-- *BSP* (Board Support Package): pacchetto software che contiene i driver e il codice necessario per far funzionare il sistema operativo su una specifica piattaforma hardware.
-- *System Integration*: assemblaggio dei componenti in user space (applicazioni, librerie, ecc.) necessari per il sistema e loro configurazione
-- *Sviluppo applicazioni*: sviluppo di applicazioni e librerie custom per il sistema embedded.
+// - *BSP* (Board Support Package): pacchetto software che contiene i driver e il codice necessario per far funzionare il sistema operativo su una specifica piattaforma hardware.
+// - *System Integration*: assemblaggio dei componenti in user space (applicazioni, librerie, ecc.) necessari per il sistema e loro configurazione
+// - *Sviluppo applicazioni*: sviluppo di applicazioni e librerie custom per il sistema embedded.
 
-== System integration: diverse possibilità
+// == System integration: diverse possibilità
 
-#show table.cell: set text(size: 0.8em)
+// #show table.cell: set text(size: 0.8em)
 
-#table(
-  columns: (auto, auto, auto),
-  fill: (luma(250), green.transparentize(90%), red.transparentize(90%)),
-  inset: 0.5em,
-  table.header(
-    [], align(center)[#text(green, weight: "bold")[Pro]], align(center)[#text(red, weight: "bold")[Contro]]
-  ),
-  text(weight: "bold")[Compilazione manuale], [
-    - Controllo totale
-    - Flessibilità
-    - Formativo
-  ],
-  [
-    - Problemi di dipendenze (dependecy hell)
-    - Conoscenza approfondita del sistema
-    - Compatibilità tra versioni
-  ],
-  [
-    #text(weight: "bold")[Distribuzione binaria] \
-    (debian, fedora, ecc.)
-  ],
-  [
-    - Facile da creare
-  ],
-  [
-    - Non disponibile per tutte le architetture
-    - Molte dipendenze
-    - Difficile da ottimizzare
-  ],
-  text(weight: "bold")[Build system],
-  [
-    - Estremamente flessibile
-    - Pacchetti specifici per embedded
-    - Compilato dai sorgenti
-    - Cross-compilazione
-  ],
-  [
-    - Tempi di compilazione
-  ]
-)
+// #table(
+//   columns: (auto, auto, auto),
+//   fill: (luma(250), green.transparentize(90%), red.transparentize(90%)),
+//   inset: 0.5em,
+//   table.header(
+//     [], align(center)[#text(green, weight: "bold")[Pro]], align(center)[#text(red, weight: "bold")[Contro]]
+//   ),
+//   text(weight: "bold")[Compilazione manuale], [
+//     - Controllo totale
+//     - Flessibilità
+//     - Formativo
+//   ],
+//   [
+//     - Problemi di dipendenze (dependecy hell)
+//     - Conoscenza approfondita del sistema
+//     - Compatibilità tra versioni
+//   ],
+//   [
+//     #text(weight: "bold")[Distribuzione binaria] \
+//     (debian, fedora, ecc.)
+//   ],
+//   [
+//     - Facile da creare
+//   ],
+//   [
+//     - Non disponibile per tutte le architetture
+//     - Molte dipendenze
+//     - Difficile da ottimizzare
+//   ],
+//   text(weight: "bold")[Build system],
+//   [
+//     - Estremamente flessibile
+//     - Pacchetti specifici per embedded
+//     - Compilato dai sorgenti
+//     - Cross-compilazione
+//   ],
+//   [
+//     - Tempi di compilazione
+//   ]
+// )
 
-== Linux Embedded: Principi
-#figure(image("images/linux-embedded-principles.png"))
+// == Linux Embedded: Principi
+// #figure(image("images/linux-embedded-principles.png"))
 
-- Compilare da sorgenti --> elevata *flessibilità*
-- Cross-compilazione --> compilazione su un *sistema diverso* da quello target
-- "Ricette" per costruire componenti --> *facilità* di realizzazione
+// - Compilare da sorgenti --> elevata *flessibilità*
+// - Cross-compilazione --> compilazione su un *sistema diverso* da quello target
+// - "Ricette" per costruire componenti --> *facilità* di realizzazione
 
-== Build system per Linux Embedded
+// == Build system per Linux Embedded
 
-- Ampio panorama: _Yocto/OpenEmbedded, Buildroot, PTXdist, OpenWRT_, ecc.
-- Ad oggi, *due* soluzioni sono tra le più popolari:
-  - *Yocto/OpenEmbedded* \ Creazione di distribuzioni Linux complete. #text(weight: "bold")[Molto potente] ma #underline[complesso].
-  - *Buildroot* \ Creazione di filesystem minimi, no pacchetti binari. Più #underline[semplice] da usare ma #text(weight: "bold")[meno flessibile].
+// - Ampio panorama: _Yocto/OpenEmbedded, Buildroot, PTXdist, OpenWRT_, ecc.
+// - Ad oggi, *due* soluzioni sono tra le più popolari:
+//   - *Yocto/OpenEmbedded* \ Creazione di distribuzioni Linux complete. #text(weight: "bold")[Molto potente] ma #underline[complesso].
+//   - *Buildroot* \ Creazione di filesystem minimi, no pacchetti binari. Più #underline[semplice] da usare ma #text(weight: "bold")[meno flessibile].
 
-= Yocto Project: Overeview
+// = Yocto Project: Overeview
 
-== Yocto: About
+// == Yocto: About
 
-- *Yocto Project* è un progetto open source per la creazione di distribuzioni Linux embedded #b[custom].
-- Ha origine nel 2010 dalla #b[Linux Foundation] e correntemente manutenuta.
+// - *Yocto Project* è un progetto open source per la creazione di distribuzioni Linux embedded #b[custom].
+// - Ha origine nel 2010 dalla #b[Linux Foundation] e correntemente manutenuta.
 
-#v(2em)
+// #v(2em)
 
-#figure(image("images/Yocto_Project_logo.svg"))
+// #figure(image("images/Yocto_Project_logo.svg"))
 
-== Yocto: Principi
+// == Yocto: Principi
 
-#figure(image("images/yocto-principles.png"))
+// #figure(image("images/yocto-principles.png"))
 
-- Yocto compila sempre pacchetti binari (*distribuzione*)
-- Il filesystem finale è generato dalla distribuzione (*image*)
+// - Yocto compila sempre pacchetti binari (*distribuzione*)
+// - Il filesystem finale è generato dalla distribuzione (*image*)
 
-== Componenti Yocto: `bitbake`
+// == Componenti Yocto: `bitbake`
 
-Su Yocto, il _build engine_ è implementato dal programma `bitbake`
+// Su Yocto, il _build engine_ è implementato dal programma `bitbake`
 
-  - `bitbake` è *task scheduler*, simile a `make`
-  - `bitbake` legge file testuali per capire *cosa* deve essere fatto e *dove*
-  - Implementato in *Python* (richiesto `Python 3` per lo sviluppo)
+//   - `bitbake` è *task scheduler*, simile a `make`
+//   - `bitbake` legge file testuali per capire *cosa* deve essere fatto e *dove*
+//   - Implementato in *Python* (richiesto `Python 3` per lo sviluppo)
 
-== Componenti Yocto: `recipes`
-#slide[
-- Il principale tipo di file testuale gestito da `bitbake` sono le *recipes*
-  - Una recipes descrive uno specifico *componente software*
-- Ogni *Recipes* descrive come #b[recuperare] e #b[compilare] un componente software
-  - programma
-  - libreria
-  - immagine
-- Le recipes hanno una *sintassi specifica*
-- `bitbake` può costruire ogni "ricetta", compilando le sue #b[dipendenze] in modo automatico
-][
-  #figure(image("images/recipes.png", width: 90%))
-]
+// == Componenti Yocto: `recipes`
+// #slide[
+// - Il principale tipo di file testuale gestito da `bitbake` sono le *recipes*
+//   - Una recipes descrive uno specifico *componente software*
+// - Ogni *Recipes* descrive come #b[recuperare] e #b[compilare] un componente software
+//   - programma
+//   - libreria
+//   - immagine
+// - Le recipes hanno una *sintassi specifica*
+// - `bitbake` può costruire ogni "ricetta", compilando le sue #b[dipendenze] in modo automatico
+// ][
+//   #figure(image("images/recipes.png", width: 90%))
+// ]
 
-== Componenti Yocto: `tasks`
-#slide[
-- Il processo di build implementato da una "ricetta" è diviso in *tasks*
-- Ogni task esegue uno specifico *step* nel processo di build
-  - recupera il codice sorgente
-  - configura il codice sorgente
-  - compila il codice sorgente
-  - installa il codice sorgente
-- Più tasks possono *dipendere* da altri tasks (inclusi quelli di altre "ricette")
-][
-  #figure(image("images/task-dependencies.png"))
-]
+// == Componenti Yocto: `tasks`
+// #slide[
+// - Il processo di build implementato da una "ricetta" è diviso in *tasks*
+// - Ogni task esegue uno specifico *step* nel processo di build
+//   - recupera il codice sorgente
+//   - configura il codice sorgente
+//   - compila il codice sorgente
+//   - installa il codice sorgente
+// - Più tasks possono *dipendere* da altri tasks (inclusi quelli di altre "ricette")
+// ][
+//   #figure(image("images/task-dependencies.png"))
+// ]
 
-== Componenti Yocto: `layers e metadati`
+// == Componenti Yocto: `layers e metadati`
 
-- `bitbake` prende in input *metadati*
-- I metadati includono #b[file di configurazione], #b[ricette], #b[file da includere], ecc.
-- I metadati sono organizzati in *layers*
-  - Un layer è un insieme di #b[recipes], #b[file di configurazione] e #b[classi con scopi comuni]
-  - Più layers possono essere combinati per creare una *distribuzione*
-- `openembedded-core` è il layer base di Yocto
-  - Tutti gli altri layer sono costruiti sopra `openembedded-core`
-  - Supporta `ARM`, `x86`, `MIPS`, `PowerPC`, `RISC-V` ecc.
-  - Supporta `QEMU` per emulare macchine con queste architetture
+// - `bitbake` prende in input *metadati*
+// - I metadati includono #b[file di configurazione], #b[ricette], #b[file da includere], ecc.
+// - I metadati sono organizzati in *layers*
+//   - Un layer è un insieme di #b[recipes], #b[file di configurazione] e #b[classi con scopi comuni]
+//   - Più layers possono essere combinati per creare una *distribuzione*
+// - `openembedded-core` è il layer base di Yocto
+//   - Tutti gli altri layer sono costruiti sopra `openembedded-core`
+//   - Supporta `ARM`, `x86`, `MIPS`, `PowerPC`, `RISC-V` ecc.
+//   - Supporta `QEMU` per emulare macchine con queste architetture
 
-== Componenti Yocto: `Poky`
+// == Componenti Yocto: `Poky`
 
-- La parola *Poky* assume diversi significati
-  - *Poky* è un repository `git` che è assemblato da altri repository: `bitbake`, `openembedded-core`, `yocto-docs` e `meta-yocto`
-  - *Poky* è anche la distro di riferimento fornita dal _Progetto Yocto_
-  - `meta-poky` è il layer fornito come rifefimento per la distro *Poky*
+// - La parola *Poky* assume diversi significati
+//   - *Poky* è un repository `git` che è assemblato da altri repository: `bitbake`, `openembedded-core`, `yocto-docs` e `meta-yocto`
+//   - *Poky* è anche la distro di riferimento fornita dal _Progetto Yocto_
+//   - `meta-poky` è il layer fornito come rifefimento per la distro *Poky*
 
-== Yocto Overview
+// == Yocto Overview
 
-#figure(image("images/yocto-overview.png"))
+// #figure(image("images/yocto-overview.png"))
 
-#meanwhile
+// #meanwhile
 
-- Il progetto Yocto *non è usato* come insieme finto di layer e strumenti
-- Al contrario, fornisce *una base comune* di #b[tools] e #b[layers] sopra i quali è possibile specificarne di #b[custom] in base alle proprie esigenze
+// - Il progetto Yocto *non è usato* come insieme finto di layer e strumenti
+// - Al contrario, fornisce *una base comune* di #b[tools] e #b[layers] sopra i quali è possibile specificarne di #b[custom] in base alle proprie esigenze
 
-== Esempio Yocto Project basato su BSP
+// == Esempio Yocto Project basato su BSP
 
-- Per costruire un'immagine per _BeagleBone Black_ ci serve:
-  - *Poky* che fornisce le *ricette comuni* e i *tool*
-  - Il layer `meta-ti-bsp` che fornisce una serie di ricette specifiche per #b[Texas Instruments] (azienda produttrice del processore di BeagleBone Black)
-- Tutte le modifiche *DEVONO* essere fatte in un layer separato. Modificare Poky o un layer esistente è *SBAGLIATO*
+// - Per costruire un'immagine per _BeagleBone Black_ ci serve:
+//   - *Poky* che fornisce le *ricette comuni* e i *tool*
+//   - Il layer `meta-ti-bsp` che fornisce una serie di ricette specifiche per #b[Texas Instruments] (azienda produttrice del processore di BeagleBone Black)
+// - Tutte le modifiche *DEVONO* essere fatte in un layer separato. Modificare Poky o un layer esistente è *SBAGLIATO*
 
-Prepariamo questo tipo di ambiente!
+// Prepariamo questo tipo di ambiente!
 
 == Configurazione host
 

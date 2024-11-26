@@ -55,8 +55,8 @@
 #set text(font: "Fira Sans", weight: "light", size: 18pt)
 #show math.equation: set text(font: "Fira Math")
 #set raw(tab-size: 4)
-#show raw.where(block: false): set text(size: 1.5em)
-#show raw: set text(size: 0.8em)
+#show raw.where(block: false): set text(size: 1.5em, font: "Fira Mono", fill: rgb("#f92672"))
+#show raw: set text(size: 0.9em)
 #show raw.where(block: true): block.with(
   fill: luma(240),
   inset: (x: 1em, y: 1em),
@@ -1557,7 +1557,7 @@ Il sito organizza i repository in #b[categorie] per funzioni come _Plugin per ID
 
 == Interazione Tramite Repository con Git
 
-Il modo *caldamente consigliato* per integrare i #b[repository] di Yocto nella distribuzione è tramite #b[Git].
+Il modo *consigliato* per integrare i #b[repository] di Yocto nella distribuzione è tramite #b[Git].
 
 - Questo consente di #b[seguire] le modifiche e #b[aggiornamenti] dei repository.
 - È possibile #b[contribuire] al progetto Yocto.
@@ -1617,15 +1617,423 @@ Questa lista si trova in `meta/files/common-licenses`. Al termine della build, t
 Se un modulo richiede una licenza che non è parte di questa lista, il processo di build solleva in #b[warning].
 Questo approccio aiuta gli sviluppatori a garantire che i pacchetti siano conformi alle licenze.
 
+// Fine prima ora
+
 == Bitbake
+
+*BitBake* è lo strumento al cuore di #b[OpenEmbedded] ed è responsabile di fare il parsing dei #b[Metadata] generando una #b[lista di task] per poi #b[eseguirli] in modo efficiente.
+
+Per vedere la lista delle opzioni supportate da *BitBake* è possibile usare i comandi:
+
+```bash
+$ bitbake --help
+$ bitbake-layers --help # utility per la gestione dei layer
+$ bitbake-getvar --help # utility per ottenere variabili
+```
+
+Il modo più comune per utilizzare *BitBake* è tramite il comando `bitbake <recipe>`.
+La `recipe` è il nome della ricetta che si vuole compilare (detta anche #b[target]).
+
+Il target spesso è il prefisso del nome del file con estensione `.bb`, ad esempio la ricetta `foo_1.2.3.bb` ha come target `foo`.
+
+```bash
+$ bitbake foo
+```
+
+Possono esserci più versioni di una ricetta, *BitBake* sceglierà quella definita nel file di configurazione.
+
+*BitBake* eseguirà anche tutti i #b[task dipendenti] prima di eseguire il task richiesto.
+
+Ad esempio prima di compilare il pacchetto `matchbox-desktop` verrà compilato il compilatore e la `glibc`, se non già compilati prima.
+
+=== Similarità con Make
+
+Concettualmente *BitBake* e *Make* sono simili ma con alcune differenze:
+
+- BitBake esegue task secondo i #b[metadata] forniti in cui sono specificate le istruzioni su quali task eseguire ed eventuali #b[dipendenze].
+- BitBake consente di fare #b[fetching] di librerie per ottenere i sorgenti da diverse fonti.
+- Le istruzioni per ogni unità che deve essere compilata è conosciuta come #b[ricetta] e definisce informazioni sulla unità.
+- BitBake ha una architettura #b[client/server] e può essere utilizzato via CLI oppure come servizio tramite XML-RPC.
 
 == Recipes
 
+Le *ricette* BitBake sono file con estensione `.bb` e sono i file più basici contenenti metadati.
+
+Una ricetta fornisce le seguenti informazioni:
+- #b[Descrizione] del pacchetto (autori, homepage, licenza, ecc.)
+- La #b[versione] della ricetta
+- #b[Dipendenze] del pacchetto
+- Dove #b[risiede] il codice sorgente e #b[come] recuperarlo
+- Se è richiesta una #b[patch] #b[dove] trovarla e #b[come] applicarla
+- Come #b[configurare] e #b[compilare] i sorgenti
+- Come #b[assemblare] e generare #b[artefatti] in uno o più pacchetti installabili
+- #b[Dove] installare il pacchetto o i pacchetti nell'immagine target
+
+#pagebreak()
+
+Un esempio di ricetta che #b[compila] ed #b[installa] un semplice programma `hello`:
+
+```bash
+SUMMARY = "Hello World"
+LICENSE = "MIT"
+LIC_FILES_CHKSUM = "file://COPYING;md5=59530bdf33659b29e73d4adb9f9f6552"
+
+SRC_URI = "file://hello.c"
+
+do_compile() {
+    ${CC} ${CFLAGS} ${LDFLAGS} -o hello hello.c
+}
+
+do_install() {
+    install -d ${D}${bindir}
+    install -m 0755 hello ${D}${bindir}
+}
+
+FILES_${PN} = "${bindir}/hello"
+```
+== Configuration Files
+
+I *file di configurazione* hanno estensione `.conf` e definiscono #b[variabili] di configurazione che governano il processo di build del progetto.
+
+Questi file si trovano in diverse aree dalla #b[configurazione della macchina], #b[configurazione della distribuzione], #b[tuning della compilazione],
+#b[configurazioni generali] e #b[configurazioni utente].
+
+Il file di configurazione *principale* è `local.conf` che si trova nella cartella `conf` del layer principale.
+
+```bash
+# Set the machine to build for
+MACHINE = "qemux86"
+
+# Set the distribution to build
+DISTRO = "poky"
+
+# Set the package management system
+PACKAGE_CLASSES ?= "package_rpm"
+```
+
 == Classes
 
-== Configurations
+Le *classi* sono file con estensione `.bbclass` che contengono #b[infromazioni] che possono essere condivise tra #b[metadati].
 
-== layers
+Il source tree di BitBake contiene una classe di base chiamata `base.bbclass` che è inclusa in tutte le ricette di default.
+Questa classe definisce i task di base come `do_fetch`, `do_configure`, `do_compile`, `do_install`, ecc.
+
+Questi task sono generalmente #b[sovrascritti] o #b[estesi] da altre classi durante lo sviluppo del progetto.
+
+```bash
+inherit base
+
+do_configure() {
+    # Add custom configuration here
+}
+```
+
+== Layers
+
+Consentono di *isolare* diverse customizzazioni tra loro.
+
+Per mantenere la modularità, le personalizzazioni per una macchina specifica vanno collocate in un #b[livello dedicato],
+chiamato Board Support Package (BSP), separato dai livelli generali.
+
+Ad esempio, le configurazioni della macchina devono restare #b[distinte] da ricette e metadati relativi a un nuovo ambiente GUI.
+
+Il livello BSP può comunque #b[aggiungere modifiche] specifiche della macchina alle ricette del livello GUI senza contaminare quest'ultimo,
+utilizzando file di tipo BitBake append (`.bbappend`).
+
+== Append Files
+
+I *file di append* (append files) sono file con estensione `.bbappend` che estendono le ricette esistenti o fanno #b[override] di variabili e task.
+
+BitBake si aspetta che ogni file `.bbappend` corrisponda ad una #b[ricetta].
+È altresì possibile definire un file `.bbappend` che ha la stessa radice del file `.bb` che si vuole estendere,
+ad esempio `foo_1.2.3.bb` può essere esteso da `foo_1.2.3.bbappend`.
+
+Quando si usa il `%` nel nome di un append file, BitBake consente di applicarlo a tutte le ricette che iniziano con quel prefisso.
+Ad esempio:
+
+```bash
+busybox_1.21.%.bbappend
+```
+
+Questo file di append verrà applicato a tutte le versioni di `busybox` che iniziano con `1.21`. Quindi il file di append verrà applicato alle seguenti ricette:
+
+```bash
+busybox_1.21.0.bb
+busybox_1.21.1.bb
+busybox_1.21.2.bb
+```
+
+== Sintassi e Operatori
+
+I file BitBake hanno una #b[sintassi] specifica simile ad altri linguaggi, ma con #b[peculiarità].
+
+=== Definizione variabili
+
+L'esempio seguente definisce una variabile `MY_VAR` con valore `hello`:
+
+```bash
+MY_VAR = "hello"
+```
+
+Come atteso, se nel contenuto della variabile sono presenti #b[spazi] prima o dopo, questi vengono *preservati*.
+
+```bash
+MY_VAR = " hello "
+MY_VAR2 = " hello"
+```
+
+Si possono usare i #b["single quote"] per definire una variabile. In questo modo possiamo avere valori che contengono il carattere `"`.
+
+```bash
+MY_VAR = 'hello "world"'
+```
+
+=== Modifica variabili
+
+Spesso capita di dover #b[modificare] una variabile già definita.
+
+Ad esempio:
+
+- Personalizzare una #b[ricetta] che definisce certe variabili
+- Cambiare il valore di #b[default] di una variabile in un file `*.bbclass`
+- Cambiare una variabile in un file `*.bbappend` per fare #b[override] di una variabile nella ricetta originale
+- Cambiare una variabile in un file `*.conf` per fare #b[override] di una configurazione esistente
+
+```bash
+$ bitbake -e
+```
+
+Mostra i valori delle variabili dopo che i #b[file di configurazione] sono stati processati.
+
+```bash
+$ bitbake -e | grep VARIABLENAME=\"
+```
+
+=== Line joining
+
+Al di fuori delle funzioni, BitBake unisce le linee che terminano con `\`.
+
+```bash
+MY_VAR = "hello \
+         world"
+```
+
+In questo caso `MY_VAR` avrà valore `hello world`.
+
+```bash
+MY_VAR = "helloword"
+MY_VAR = "hello\
+world"
+```
+
+In questo caso `MY_VAR` avrà valore `helloworld` in entrambi i casi.
+
+#pagebreak()
+
+=== Variable Expansion
+
+Le variabili possono avere un #b[riferimento] al contenuto di altre variabili:
+
+```bash
+MY_VAR = "hello"
+MY_VAR2 = "${MY_VAR} world"
+```
+
+Il risultato di `MY_VAR2` sarà `hello world`. Le parentesi graffe `{}` sono obbligatorie.
+
+L'operatore `=` non esapnde immediatamente le variabili:
+
+```bash
+A = "${B} baz"
+B = "${C} bar"
+C = "foo"
+*At this point, ${A} equals "foo bar baz"*
+C = "qux"
+*At this point, ${A} equals "qux bar baz"*
+B = "norf"
+*At this point, ${A} equals "norf baz"*
+```
+
+Il comportamento #b[speculare] a questo è dato dall'operatore `:=` che espande immediatamente le variabili.
+
+Se l'espansione di una variabile è usata su una variabile non definita, la stringa corrispondente verrà usata:
+
+```bash
+BAR = "${FOO}"
+```
+
+Questo assegnerà a `BAR` il valore `"${FOO}"`, dal momento che `FOO` non è definita.
+
+#pagebreak()
+
+=== Valore di default
+
+Si può fare uso dell'operatore `?=` per assegnare un valore di default a una variabile.
+
+Questo assegnamento consente di definire una variabile che se non è già definita, verrà assegnato il valore di default.
+
+```bash
+MY_VAR ?= "hello"
+```
+
+Se `MY_VAR` è già definita quando questo statement viene processato, allora manterrà il suo valore.
+Se `MY_VAR` non è definita, allora verrà assegnato il valore `hello`.
+
+Questo operatore assegna *immediatamente* il valore di default (quando non definita prima la variabile).
+Se ci sono chiamate multiple dell'operatore `?=` sulla stessa variabile, #b[solo il primo assegnamento] avrà effetto.
+
+#pagebreak()
+
+=== Weak default
+
+Il valore di default "weak" è il valore che viene espanso se non c'è nessun valore associato alla variabile.
+
+L'operatore `??=` ha #b[effetto immediato] rimpiazzando qualsiasi altro "weak value" precedentemente assegnato.
+
+#components.side-by-side(columns: 2)[
+  ```bash
+  W ??= "x"
+  A := "${W}" # Immediate variable expansion
+  W ??= "y"
+  B := "${W}" # Immediate variable expansion
+  W ??= "z"
+  C = "${W}"
+  W ?= "i"
+  ```
+][
+  ```bash
+
+  A = "x"
+
+  B = "y"
+
+  C = "i"
+  W = "i"
+  ```
+]
+
+#pagebreak()
+
+=== Espansione immediata
+
+L'operatore `:=` espande *immediatamente* le variabili invece che espandere solo quando la variabile è usata.
+
+#components.side-by-side(columns: 2)[
+  ```bash
+  T = "123"
+  A := "test ${T}"
+  T = "456"
+  B := "${T} ${C}"
+  C = "cval"
+  C := "${C}append"
+  ```
+][
+  ```bash
+
+  A = "test 123"
+
+  B = "456 cvalappend"
+  C = "cvalappend"
+
+
+  ```
+]
+
+#pagebreak()
+
+=== Append e prepend con spazi
+
+#b[Appendere] o #b[prependere] è comune e viene fatto con gli operatori `+=` e `=+`.
+Questi operatori *aggiungono uno spazio* tra il valore corrente e il valore da aggiungere.
+
+```bash
+B = "bval"
+B += "additionaldata"
+C = "cval"
+C =+ "test"
+```
+
+In questo caso `B` avrà valore `bval additionaldata` e `C` avrà valore `test cval`.
+
+Se non si vuole aggiungere uno spazio, si può fare uso degli operatori `.=` e `=.`.
+
+#pagebreak()
+
+=== Append e prepend (override syntax)
+
+Si può anche appendere o prependere il valore di una variabile utilizzando la #b[sintassi di override].
+Quando si usa questa sintassi, #b[non vengono aggiunti spazi].
+
+Questi operatori differiscono da `:=`, `=:`, `+=`, `=+` in quanto sono applicati in fase di *espansione* e non immediatamente.
+
+```bash
+B = "bval"
+B:append = " additional data"
+C = "cval"
+C:prepend = "additional data "
+D = "dval"
+D:append = "additional data"
+```
+
+#pagebreak()
+
+=== Rimozione (override syntax)
+
+È possibile *rimuovere* valori da liste utilizzando la sintassi `VARIABLE:remove`.
+Differentmente da `:append` e `:prepend` non è necessario aggiungere spazi vuoti.
+
+```bash
+FOO = "123 456 789 123456 123 456 123 456"
+FOO:remove = "123"
+FOO:remove = "456"
+FOO2 = " abc def ghi abcdef abc def abc def def"
+FOO2:remove = "\
+    def \
+    abc \
+    ghi \
+    "
+``` 
+
+Anche in questo caso, la rimozione avviene in fase di #b[espansione].
+
+#pagebreak()
+
+=== Variable flag syntax
+
+Le *variable flags* sono una implementazione di BitBake per aggiungere #b[proprietà] o #b[attributi] alle variabili.
+
+Tutti gli operatori precedentemente visti possono essere usati con le *variable flags*.
+
+```bash
+FOO[a] = "abc"
+FOO[b] = "123"
+FOO[a] += "456"
+```
+
+Un esempio comune è quello di aggiungere una #b[breve documentazione] alla variabile:
+
+```bash
+CACHE[doc] = "The directory holding the cache of the metadata."
+```
+
+#pagebreak()
+
+=== Inline Python variable expansion
+
+BitBake supporta l'espansione di variabili usando #b[Python].
+
+```bash
+DATE = "${@time.strftime('%Y%m%d',time.gmtime())}"
+```
+
+Questo esempio associa alla variabile `DATE` il valore della data corrente.
+
+Più comunemente si usa questa #b[feature] per estrarre valori da variabili interne di BitBake:
+
+```bash
+PN = "${@bb.parse.vars_from_file(d.getVar('FILE', False),d)[0] or 'defaultpkgname'}"
+PV = "${@bb.parse.vars_from_file(d.getVar('FILE', False),d)[1] or '1.0'}"
+```
 
 == Users Configuration
 

@@ -56,7 +56,7 @@
 #show math.equation: set text(font: "Fira Math")
 #set raw(tab-size: 4)
 #show raw.where(block: false): set text(size: 1.5em, font: "Fira Mono", fill: rgb("#f92672"))
-#show raw: set text(size: 0.9em)
+#show raw: set text(size: 0.8em)
 #show raw.where(block: true): block.with(
   fill: luma(240),
   inset: (x: 1em, y: 1em),

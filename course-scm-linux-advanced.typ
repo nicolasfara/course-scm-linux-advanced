@@ -202,6 +202,36 @@
 
 #title-slide()
 
+== Corso Linux Avanzato
+
+*Modulo 1* a cura del prof. #b[Giovanni Ciatto] \
+#fa-icon("github", fa-set: "Brands") #link("https://gciatto.github.io/course-scm-linux-advanced/#/", `https://gciatto.github.io/course-scm-linux-advanced/`)
+
+#v(2em)
+
+*Modulo 2* a cura di #b[Nicolas Farabegoli] \
+#fa-icon("github", fa-set: "Brands") #link("https://github.com/nicolasfara/course-scm-linux-advanced/releases/latest", `https://github.com/nicolasfara/course-scm-linux-advanced/releases/latest`)
+
+== Agenda
+
+=== Modulo 1: Package manager su Linux
+
+- Introduzione al concetto di *package manager*
+- *Advanced Package Tool* (APT)
+- Gestione versioni con `update-alternatives`
+- *Alpine Package Manager* (`apk`)
+
+=== Modulo 2: Server grafici
+
+- Introduzione a *X Window System*
+- Introduzione a *Wayland*
+- Integrazione tra *X Window System* e *Wayland*
+
+=== Modulo 3: Yocto Project
+
+- Introduzione a *Yocto Project*
+- Creazione di una *immagine custom*
+
 // ============================ Packages and Package Managers ============================
 // =======================================================================================
 = Distro Linux Package Managers

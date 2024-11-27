@@ -919,7 +919,7 @@ mentre i #b[client] (applicazioni grafiche) possono risedere "altrove".
 
 Le risorse gestire dal server X includono:
 - *Schede video*
-- *Pointing devices*: mouse, tastiera, touchpad, ...
+- *Pointing devices*: mouse, touchpad, ...
 - *Tastiere*
 
 == Perché finestre appaiono e agiscono differentemente?

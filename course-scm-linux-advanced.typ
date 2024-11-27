@@ -35,6 +35,9 @@
 #let example = thmplain("example", "Example").with(numbering: none)
 #let proof = thmproof("proof", "Proof")
 
+#let b(content) = text(weight: "bold", content)
+#set list(marker: text(1.5em, [•]))
+
 #show: metropolis-theme.with(
   aspect-ratio: "16-9",
   footer: self => self.info.institution,
@@ -45,10 +48,10 @@
   config-info(
     title: [Corso Linux Avanzato],
     // subtitle: [Subtitle],
-    author: [Nicolas Farabegoli],
-    date: datetime.today(),
+    author: [#b[Nicolas Farabegoli]],
+    date: [_Versione slide_: #datetime.today().display()],
     institution: [SCM Campus],
-    // logo: emoji.school,
+    logo: fa-linux(),
   ),
 )
 
@@ -63,9 +66,6 @@
   radius: 0.7em,
   width: 100%,
 )
-
-#let b(content) = text(weight: "bold", content)
-#set list(marker: text(1.5em, [•]))
 
 #let carbon-snippet(
   code,
@@ -210,7 +210,7 @@
 #v(2em)
 
 *Modulo 2* a cura di #b[Nicolas Farabegoli] \
-#fa-icon("github", fa-set: "Brands") #link("https://github.com/nicolasfara/course-scm-linux-advanced/releases/latest", `https://github.com/nicolasfara/course-scm-linux-advanced/releases/latest`)
+#fa-icon("github", fa-set: "Brands") #link("https://github.com/nicolasfara/course-scm-linux-advanced/releases", `https://github.com/nicolasfara/course-scm-linux-advanced/releases`)
 
 == Agenda
 
@@ -231,6 +231,28 @@
 
 - Introduzione a *Yocto Project*
 - Creazione di una *immagine custom*
+
+== Esercitazioni
+
+È prevista una serie di #b[esercitazioni] per ciascun modulo.
+
+Le esercitazioni sono disponibili a questo link: \
+#fa-icon("github", fa-set: "Brands") #link("https://github.com/nicolasfara/course-scm-linux-advanced-exercises", `https://github.com/nicolasfara/course-scm-linux-advanced-exercises`)
+
+Nel branch `soluzioni` sono disponibili le soluzioni degli esercizi.
+
+=== Setup esercitazioni
+
+Clonare il repository delle esercitazioni:
+```
+$ git clone https://github.com/nicolasfara/course-scm-linux-advanced-exercises.git
+```
+
+Per passare al branch `soluzioni`:
+
+```
+$ git checkout soluzioni
+```
 
 // ============================ Packages and Package Managers ============================
 // =======================================================================================
@@ -398,6 +420,8 @@ I binari installati #b[potrebbero] non funzionare correttamente se richiedono _l
   $ dpkg --status <pacchetto>
   ```
 
+  #pagebreak()
+
   Per scoprire quale pacchetto ha installato un certo file:
 
   ```bash
@@ -435,10 +459,10 @@ I binari installati #b[potrebbero] non funzionare correttamente se richiedono _l
   #figure(image("images/linux-package-manager-explanation.png"))
 
 == Repository
-  (Quasi) tutte le distribuzioni Linux mantengono uno o più #alert[repository] ufficiali contenenti i pacchetti software.
+  (Quasi) tutte le distribuzioni Linux mantengono uno o più #b[repository] ufficiali contenenti i pacchetti software.
 
   #components.side-by-side(columns: (2fr, 1fr))[
-    I repository sono #alert[server] che contengono i pacchetti software e le informazioni necessarie per la loro installazione.
+    I repository sono #b[server] che contengono i pacchetti software e le informazioni necessarie per la loro installazione.
     
     Esempio di repository: \
     #link("http://archive.ubuntu.com/ubuntu/")[`http://archive.ubuntu.com/ubuntu/`]
@@ -447,16 +471,16 @@ I binari installati #b[potrebbero] non funzionare correttamente se richiedono _l
   ]
 
 == Repository e metadati
-  I *repository* contengono, oltre ai pacchetti software, anche i #alert[metadati] necessari per la gestione degli stessi.
+  I *repository* contengono, oltre ai pacchetti software, anche i #b[metadati] necessari per la gestione degli stessi.
 
-  I #alert[metadati] sono informazioni che descrivono il pacchetto come:
+  I #b[metadati] sono informazioni che descrivono il pacchetto come:
     - nome
     - versione
     - dipendenze
     - descrizione
 
 == Package manager e interazioni con repository
-  Il *package manager* inizialmente interagisce con i metadati, scaricando le informazioni necessarie per la gestione dei pacchetti e le salva in una #alert[cache locale].
+  Il *package manager* inizialmente interagisce con i metadati, scaricando le informazioni necessarie per la gestione dei pacchetti e le salva in una #b[cache locale].
 
   Quando si richiede un aggiornamento, il *package manager* aggiorna la cache locale e confronta le informazioni con quelle presenti nel repository.
 
@@ -480,7 +504,7 @@ I binari installati #b[potrebbero] non funzionare correttamente se richiedono _l
   ```
 
 #focus-slide[
-  *Advanced Package Tool* (`APT`)
+  *Advanced Package Tool* (APT)
 ]
 
 == APT: Advanced Package Tool
@@ -616,7 +640,7 @@ Dal momento che questo comando utilizza il database interno, è *importante* ese
     - Nota: questo comando rimuove i pacchetti scaricati, ma *non* i pacchetti installati
 
 
-#focus-slide[*Esercitazione*: `01-apt`]
+#focus-slide[*Esercitazione*: 01-apt]
 
 == Gestione di più versioni di un pacchetto
 
@@ -672,7 +696,7 @@ later for copying conditions. There is NO warranty.
 $ update-alternatives --list editor
 ```
 
-#focus-slide[*Esercitazione*: `02-update-alternatives`]
+#focus-slide[*Esercitazione*: 02-update-alternatives]
 
 == Alpine Package Manager: `apk`
 
@@ -777,7 +801,7 @@ Con `apk` questo viene fatto automaticamente alla rimozione del pacchetto.
 apk del bash
 ```
 
-#focus-slide[*Esercitazione*: `03-apk`]
+#focus-slide[*Esercitazione*: 03-apk]
 
 = Server Grafici: Xorg e Wayland
 
@@ -861,6 +885,27 @@ Vista la dominanza dell'implementazione _X.org_ ha portato diverse persone a rif
   ]
 ][
   #figure(image("images/xorg-architecture.png"))
+]
+
+== Interazione Client/Server X
+
+#slide(composer: (1fr, auto))[
+  #only("1")[
+    Per comprendere l'architettura di *Wayland* è utile confrontarla con quella di #b[X].
+
+    1. Il kernel prende eventi dai dispositivi di input e li passa al server #b[traducendo] i singoli protocolli in un formato standard (`evdev`).
+    2. Il server #[X] determina quale finestra è coinvolta dall'evento e lo passa al client. Il server #b[X] non sa l'effettiva posizione delle finestre in quanto gestito dal #b[compositor].
+    3. Il client gestisce l'evento e decide come reagire.
+  ]
+  #only("2")[
+    4. Quando il server #b[X] riceve la richiesta di *rerendering* calcolando le nuove bounding region delle finestre e lo comunica al #b[compositor] (_damage event_).
+    5. Il compositor riorganizza parte dello schermo dove la finestra è visibile. È anche responsabile di #b[renderizzare] l'intero schermo passando dal server #b[X] per il rendereing.
+    6. Il server #b[X] riceve la richiesta di rerendering e #b[copia] il buffer del compositor per essere renderizzato.
+  ]
+  
+][
+  #align(center)[Architettura di #b[X]]
+  #figure(image("images/x-architecture.png"))
 ]
 
 == Dov'è il server X?

@@ -1013,7 +1013,7 @@ Alcuni esempi di #b[Display Manager] sono:
 
 == Avvio Display Manager via init system
 
-In orami quasi tutte le distribuzioni come _Fedora_, _Manjaro_ (Arch) e _Ubuntu_,
+In ormai quasi tutte le distribuzioni come _Fedora_, _Manjaro_ (Arch) e _Ubuntu_,
 il display manager viene avviato tramite il #b[init system] (es. `systemd`):
 
 ```bash

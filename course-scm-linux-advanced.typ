@@ -2231,9 +2231,9 @@ La variabile #underline[#link("https://docs.yoctoproject.org/ref-manual/features
 
 == Variabili comuni
 
-Le variabili comuni sono variabili che sono #b[comuni] a tutte le ricette e classi.
+Le variabili più #b[utili] e #b[comuni] a tutte le ricette e classi.
 
-Alcune variabili comuni sono:
+Alcune di queste sono:
 
 - `PN` (Package Name): il nome del pacchetto
 - `PV` (Package Version): la versione del pacchetto
@@ -2406,6 +2406,8 @@ La lista completa delle variabili comuni è disponibile nella #underline[#link("
 
 // Prepariamo questo tipo di ambiente!
 
+#focus-slide[Configurazione ambiente di sviluppo Yocto]
+
 == Configurazione host
 
 Requisiti per il *build host*:
@@ -2425,22 +2427,25 @@ Configurazione locale:
 $ sudo locale-gen en_US.UTF-8
 ```
 
+#align(center)[#fa-warning() Si consiglia di usare *CROPS* come ambiente di sviluppo per Yocto. #fa-warning()]
+
 == Getting started: Poky reference system
 
 Tutti i repository che fanno parte del progetto Yocto sono disponibili su: \
-#link("https://git.yoctoproject.org", `https://git.yoctoproject.org`)
+#underline[#link("https://git.yoctoproject.org", `https://git.yoctoproject.org`)]
 
 Per iniziare, cloniamo il repository `poky`:
 ```bash
 $ git clone -b scarthgap git://git.yoctoproject.org/poky
+$ git checkout scarthgap-5.0.5
 ```
 
-Ogni 6 mesi viene rilasciata una nuova versione di Yocto e menutenuta per 7 mesi.
-Versioni #b[LTS] sono supportate per 4 anni.
+Ogni #b[6 mesi] viene rilasciata una nuova versione di Yocto e menutenuta per #b[7 mesi].
+Versioni #b[LTS] sono supportate per #b[4 anni].
 
 Ogni _release_ ha un *codename* come `kirkstone` o `honister` corrispondente a un *release number*.
 Un riepilogo delle versioni è disponibile su: \
-#link("https://wiki.yoctoproject.org/wiki/Releases", `https://wiki.yoctoproject.org/wiki/Releases`)
+#underline[#link("https://wiki.yoctoproject.org/wiki/Releases", `https://wiki.yoctoproject.org/wiki/Releases`)]
 
 == Poky source tree
 
@@ -2458,9 +2463,9 @@ $ tree -L 1
 ├── meta-poky             # Contiene la configurazione per la Poky reference distribution
 ├── meta-selftest
 ├── meta-skeleton         # Contiene i template delle ricette per BSP e kernel development
-├── meta-yocto-bsp        # Configurazione per Yocto Project reference hardware board support package
+├── meta-yocto-bsp        # Configurazione per Yocto reference hardware board support package
 ├── oe-init-build-env     # Script per inizializzare l'ambiente di build
-├── scripts               # Script di supporto per la build, lo sviluppo e il flashing dell'immagine
+├── scripts               # Script di supporto per la build, lo sviluppo e il flashing
 └── SECURITY.md
 ```
 
@@ -2510,7 +2515,7 @@ $ source poky/oe-init-build-env /path/to/build/directory
 Il file `conf/local.conf` contiene le variabili di configurazione locale per la build:
   - `BB_NUMBER_THREADS`: definisce quanti *task* possono essere eseguiti in parallelo da `bitbake`. Di default è impostato a `$(nproc)`
   - `PARALLEL_MAKE`: definisce quanti processi possono essere utilizzati per la compilazione. Di default è impostato a `$(nproc)`
-  - `MACHINE`: definisce la macchina target per la build, nel nostro caso `beaglebone`
+  - `MACHINE`: definisce la macchina target per la build
 
 Il file `conf/local.conf` conterrà quindi:
 
